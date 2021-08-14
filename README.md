@@ -1,5 +1,5 @@
 # LuxaMic
-Windows 10 app to set [Luxafor RGB lights](https://luxafor.com/products/) according to whether your microphone is in use by other applications. Allows you to use your Luxafor lights to indicate when you are taking part in a web meeting and should not be disturbed, regardless of the meeting software you are using.
+Windows 10 app to set [Luxafor RGB lights](https://luxafor.com/products/) according to whether your microphone is in use by other applications. Allows you to use your Luxafor lights as an 'on air' indicator to show when you are taking part in a web meeting and should not be disturbed, regardless of the meeting software you are using.
 
 ## Requirements
 
