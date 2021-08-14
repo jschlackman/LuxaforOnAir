@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using LuxaMic.Properties;
 using System.Timers;
-using System.Collections.ObjectModel;
 using LuxaforSharp;
 using System.Management;
 
@@ -355,6 +354,13 @@ namespace LuxaMic
             SetAllLights(currentColor);
         }
 
+        public void SetLightsOff()
+        {
+            currentColor = System.Drawing.Color.Black;
+            SetAllLights(currentColor);
+        }
+
+
     }
 
     public static class ColorHelper
@@ -516,12 +522,29 @@ namespace LuxaMic
         /// </summary>
         private static System.Windows.Forms.NotifyIcon notifyIcon;
 
+        /// <summary>
+        /// Handles session switch events
+        /// </summary>
         private static SessionSwitchEventHandler SessionSwitchHandler;
 
-        public ObservableCollection<RGBLightGroup> Lights { get; set; }
-
+        // Registry key & value for autorun entry
         private const string regWindowsRunKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
         private const string regProgramValue = "LuxaMic";
+
+        /// <summary>
+        /// Watches for system hardware changes (e.g. USB connect/disconnect)
+        /// </summary>
+        private static ManagementEventWatcher hardwareWatcher;
+        
+        /// <summary>
+        /// Watches for system power events (e.g. suspend/resume)
+        /// </summary>
+        private static ManagementEventWatcher powerWatcher;
+
+        /// <summary>
+        /// Keeps track of whether the console is locked or unlocked.
+        /// </summary>
+        private static bool bConsoleLocked = false;
 
         public MainWindow()
         {
@@ -556,12 +579,20 @@ namespace LuxaMic
             chkStartAtLogon.IsChecked = (Registry.CurrentUser.OpenSubKey(regWindowsRunKey).GetValue(regProgramValue,"").ToString() == "\"" + System.Windows.Forms.Application.ExecutablePath + "\"");
 
             // Watch for hardware changes
-            var watcher = new ManagementEventWatcher();
-            var query = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2 or EventType = 3 GROUP WITHIN 1");
-            watcher.EventArrived += new EventArrivedEventHandler(LFRDevices_Changed);
-            watcher.Query = query;
-            watcher.Start();
+            hardwareWatcher = new ManagementEventWatcher
+            {
+                Query = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2 or EventType = 3 GROUP WITHIN 1")
+            };
+            hardwareWatcher.EventArrived += new EventArrivedEventHandler(LFRDevices_Changed);
+            hardwareWatcher.Start();
 
+            // Watch for power changes
+            powerWatcher = new ManagementEventWatcher
+            {
+                Query = new WqlEventQuery("SELECT * FROM Win32_PowerManagementEvent")
+            };
+            powerWatcher.EventArrived += new EventArrivedEventHandler(PowerEvent_Arrive);
+            powerWatcher.Start();
 
             // Run the first icon check now
             CheckNotificationIcons();
@@ -583,16 +614,51 @@ namespace LuxaMic
             CheckNotificationIcons();
         }
 
+        /// <summary>
+        /// Respond to suspend/resume events
+        /// </summary>
+        private void PowerEvent_Arrive(object sender, EventArrivedEventArgs e)
+        {
+            foreach (PropertyData pd in e.NewEvent.Properties)
+            {
+                if (pd.Value != null)
+                {
+                    string eventValue = pd.Value.ToString();
+                    // Entering suspend
+                    if (eventValue == "4")
+                    {
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            Settings.Default.luxSettings.SetLightsOff();
+                        });
 
+                    } 
+                    // Resuming from suspend
+                    else if (eventValue == "7")
+                    {
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            CheckNotificationIcons();
+                        });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Respond to session switching (workstation lock/unlock)
+        /// </summary>
         public void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
         {
             switch (e.Reason)
             {
                 case SessionSwitchReason.SessionUnlock:
                 case SessionSwitchReason.ConsoleConnect:
+                    bConsoleLocked = false;
                     CheckNotificationIcons();
                 break;
                 default:
+                    bConsoleLocked = true;
                     Settings.Default.luxSettings.SetLocked();
                 break;
             }
@@ -678,8 +744,12 @@ namespace LuxaMic
                 }
             }
 
+            if (bConsoleLocked)
+            {
+                Settings.Default.luxSettings.SetLocked();
+            }
             // Check if any of the in use strings are currently being displayed by a notification icon
-            if (InUseText.Any(s => iconNames.Contains(s + "\n")))
+            else if (InUseText.Any(s => iconNames.Contains(s + "\n")))
             {
                 // Trigger mic in use lights
                 Settings.Default.luxSettings.SetInUse();
@@ -738,6 +808,7 @@ namespace LuxaMic
             ShellEvents.DisposeTrayHooks();
             SystemEvents.SessionSwitch -= SessionSwitchHandler;
             notifyIcon.Dispose();
+            hardwareWatcher.Stop();
         }
 
         private void BtnMicInUse_Click(object sender, RoutedEventArgs e)
@@ -835,6 +906,5 @@ namespace LuxaMic
                 }
             }
         }
-
     }
 }
