@@ -5,9 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LuxaMic"
         mc:Ignorable="d"
-        Title="LuxaMic Settings" Height="237.739" Width="584.555" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="310" MinHeight="275" Visibility="Hidden">
-    <Grid Margin="0,0,3.6,0.6">
-        <TabControl x:Name="tabControl" Margin="10,10,7.8,34">
+        Title="LuxaMic Settings" Height="256.277" Width="584.555" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="310" MinHeight="285" Visibility="Visible">
+    <Grid Margin="0,0,0,0">
+        <Rectangle Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" Margin="0,0,0,0" Height="38" VerticalAlignment="Bottom"/>
+
+        <TabControl x:Name="tabControl" Margin="10,10,8,44  ">
             <TabItem Header="General" HorizontalAlignment="Left" Height="20.8" VerticalAlignment="Top" Width="53.6">
                 <Grid Background="#FFE5E5E5">
                     <CheckBox x:Name="chkStartAtLogon" Content="Automatically start program at Windows logon" HorizontalAlignment="Left" Margin="10,0,0,9.8" Checked="ChkStartAtLogon_Changed" Unchecked="ChkStartAtLogon_Changed" Height="15" VerticalAlignment="Bottom"/>
@@ -20,7 +22,7 @@
                     <Label x:Name="label1" Content="Color:" HorizontalAlignment="Left" Margin="144,16,0,0" VerticalAlignment="Top"/>
                     <Label x:Name="label_Copy" Content="Microphone Not Use" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="label1_Copy" Content="Color:" HorizontalAlignment="Left" Margin="144,40,0,0" VerticalAlignment="Top"/>
-                    <Label x:Name="label_Copy1" Content="Console Locked" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <Label x:Name="label_Copy1" Content="Console Locked" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" FontWeight="Bold" Visibility="Hidden"/>
                     <Label x:Name="label1_Copy1" Content="Color:" HorizontalAlignment="Left" Margin="144,64,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
@@ -29,14 +31,14 @@
             </TabItem>
             <TabItem Header="Debug">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox x:Name="txtDebugLog" Margin="10,31,90.2,9.4" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" FontFamily="Consolas" FontSize="11" Background="#FF2C2C2C" Foreground="White" />
+                    <TextBox x:Name="txtDebugLog" Margin="10,31,90,10" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" FontFamily="Consolas" FontSize="11" Background="#FF2C2C2C" Foreground="White" />
                     <TextBlock x:Name="textBlock3" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Debug log:" VerticalAlignment="Top"/>
-                    <Button x:Name="btnTest" Content="Test Icons" Margin="0,31,9.6,0" VerticalAlignment="Top" ToolTip="Check notifications icons now and log results" Click="BtnTest_Click" HorizontalAlignment="Right" Width="75"/>
+                    <Button x:Name="btnTest" Content="Test Icons" Margin="0,31,8,0" VerticalAlignment="Top" ToolTip="Check notifications icons now and log results" Click="BtnTest_Click" HorizontalAlignment="Right" Width="75"/>
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button x:Name="btnExit" Content="Exit" Margin="0,0,7.8,10" Height="19" VerticalAlignment="Bottom" Click="ExitMenuItem_Click" HorizontalAlignment="Right" Width="75"/>
-        <Button x:Name="btnDone" Content="Done" Margin="0,0,87.8,10" Click="BtnDone_Click" Height="19" VerticalAlignment="Bottom" IsDefault="True" HorizontalAlignment="Right" Width="75"/>
+        <Button x:Name="btnExit" Content="Exit" Margin="0,0,8,10" Height="19" VerticalAlignment="Bottom" Click="ExitMenuItem_Click" HorizontalAlignment="Right" Width="75"/>
+        <Button x:Name="btnDone" Content="Done" Margin="0,0,88,10" Click="BtnDone_Click" Height="19" VerticalAlignment="Bottom" IsDefault="True" HorizontalAlignment="Right" Width="75"/>
 
     </Grid>
 </Window>

@@ -230,7 +230,7 @@ namespace LuxaMic
         /// <summary>
         /// Initilizes the Luxafor hardware
         /// </summary>
-        /// <returns>Debug log message iondicating how many devices were found.</returns>
+        /// <returns>Debug log message indicating how many devices were found.</returns>
         public string InitHardware()
         {
             string logMsg;
@@ -241,11 +241,11 @@ namespace LuxaMic
 
             if (devices.Count() == 0)
             {
-                logMsg = "No Luxafor light available.\n";
+                logMsg = "No Luxafor light available.";
             }
             else
             {
-                logMsg = devices.Count().ToString() + " Luxafor light" + ((devices.Count() != 1) ? "s":"") + " ready.\n";
+                logMsg = devices.Count().ToString() + " Luxafor light" + ((devices.Count() != 1) ? "s":"") + " ready.";
             }
 
             return logMsg;
@@ -567,7 +567,7 @@ namespace LuxaMic
             InUseText = WindowsStrings.GetMicUseStrings();
             
             // Initialize Luxafor devices
-            txtDebugLog.Text += Settings.Default.luxSettings.InitHardware();
+            WriteToDebug(Settings.Default.luxSettings.InitHardware());
 
             btnMicInUse.Background = Settings.Default.luxSettings.Colors.MicInUse.ToBrush();
             btnMicNotInUse.Background = Settings.Default.luxSettings.Colors.MicNotInUse.ToBrush();
@@ -581,9 +581,9 @@ namespace LuxaMic
             // Watch for hardware changes
             hardwareWatcher = new ManagementEventWatcher
             {
-                Query = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2 or EventType = 3 GROUP WITHIN 1")
+                Query = new WqlEventQuery("SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' GROUP WITHIN 1")
             };
-            hardwareWatcher.EventArrived += new EventArrivedEventHandler(LFRDevices_Changed);
+            hardwareWatcher.EventArrived += LFRDevices_Changed;
             hardwareWatcher.Start();
 
             // Watch for power changes
@@ -591,7 +591,7 @@ namespace LuxaMic
             {
                 Query = new WqlEventQuery("SELECT * FROM Win32_PowerManagementEvent")
             };
-            powerWatcher.EventArrived += new EventArrivedEventHandler(PowerEvent_Arrive);
+            powerWatcher.EventArrived += PowerEvent_Arrive;
             powerWatcher.Start();
 
             // Run the first icon check now
@@ -604,11 +604,8 @@ namespace LuxaMic
         /// </summary>
         private void LFRDevices_Changed(object sender, EventArrivedEventArgs e)
         {
-            this.Dispatcher.Invoke(() =>
-            {
-                txtDebugLog.Text += "Hardware change detected.\n";
-                txtDebugLog.Text += Settings.Default.luxSettings.InitHardware();
-            });
+            WriteToDebug("Hardware change detected.");
+            WriteToDebug(Settings.Default.luxSettings.InitHardware());
             
             // Run an icon check now
             CheckNotificationIcons();
@@ -627,6 +624,7 @@ namespace LuxaMic
                     // Entering suspend
                     if (eventValue == "4")
                     {
+                        WriteToDebug("System entering Suspend, turning lights off.");
                         this.Dispatcher.Invoke(() =>
                         {
                             Settings.Default.luxSettings.SetLightsOff();
@@ -636,6 +634,7 @@ namespace LuxaMic
                     // Resuming from suspend
                     else if (eventValue == "7")
                     {
+                        WriteToDebug("System resuming from Suspend, turning lights back on.");
                         this.Dispatcher.Invoke(() =>
                         {
                             CheckNotificationIcons();
@@ -654,10 +653,12 @@ namespace LuxaMic
             {
                 case SessionSwitchReason.SessionUnlock:
                 case SessionSwitchReason.ConsoleConnect:
+                    WriteToDebug("Console session unlocked. Setting to standard color.");
                     bConsoleLocked = false;
                     CheckNotificationIcons();
                 break;
                 default:
+                    WriteToDebug("Console session locked. Setting to Locked color.");
                     bConsoleLocked = true;
                     Settings.Default.luxSettings.SetLocked();
                 break;
@@ -766,6 +767,21 @@ namespace LuxaMic
 
         }
 
+        /// <summary>
+        /// Write a message to thr debug log control
+        /// </summary>
+        /// <param name="Msg">Message to write to the log</param>
+        /// <param name="NoNewLine">Whether to add a new line at the end of the message</param>
+        private void WriteToDebug(string Msg, bool NoNewLine = false)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                txtDebugLog.AppendText(DateTime.Now.ToString("'['yy'-'MM'-'dd HH':'mm':'ss']' ") + Msg);
+                if (!NoNewLine) { txtDebugLog.AppendText("\n"); }
+                txtDebugLog.ScrollToEnd();
+            });
+        }
+
         private void ApplySettings()
         {
             Settings.Default.Save();
@@ -807,8 +823,13 @@ namespace LuxaMic
             Settings.Default.luxSettings.ShutdownHardware();
             ShellEvents.DisposeTrayHooks();
             SystemEvents.SessionSwitch -= SessionSwitchHandler;
+
             notifyIcon.Dispose();
+
             hardwareWatcher.Stop();
+            hardwareWatcher.Dispose();
+            powerWatcher.Stop();
+            powerWatcher.Dispose();
         }
 
         private void BtnMicInUse_Click(object sender, RoutedEventArgs e)
@@ -860,7 +881,7 @@ namespace LuxaMic
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
-            txtDebugLog.Text += "Found tray icons:\n" + CheckNotificationIcons();
+            WriteToDebug("Found tray icons:\n" + CheckNotificationIcons());
         }
 
         /// <summary>
