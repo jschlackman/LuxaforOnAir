@@ -550,6 +550,9 @@ namespace LuxaMic
         {
             
             InitializeComponent();
+            
+            lblProductVer.Content = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            lblAbout.Content = "by James Schlackman\n\nThis software uses functionality from the following libraries:\n• LuxaforSharp by Edouard Paumier\n• HidLibrary by Mike O'Brien, Austin Mullins, and other contributors.";
 
             ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
             SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
@@ -926,6 +929,12 @@ namespace LuxaMic
                     windowsRun.DeleteValue(regProgramValue);
                 }
             }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LuxaMic"
         mc:Ignorable="d"
-        Title="LuxaMic Settings" Height="256.277" Width="584.555" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="310" MinHeight="285" Visibility="Visible">
+        Title="LuxaMic Settings" Height="285" Width="600" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="600" MinHeight="285" Visibility="Hidden">
     <Grid Margin="0,0,0,0">
         <Rectangle Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" Margin="0,0,0,0" Height="38" VerticalAlignment="Bottom"/>
 
@@ -27,7 +27,16 @@
                 </Grid>
             </TabItem>
             <TabItem Header="About" HorizontalAlignment="Left" Height="20.8" VerticalAlignment="Top" Width="53.6">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#FFE5E5E5">
+                    <Label x:Name="lblProductVer" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold" Content=""/>
+                    <Image x:Name="image_Copy" Margin="0,0,20,0" Source="AppIcon.ico" Stretch="None" HorizontalAlignment="Right" Width="128"/>
+                    <Label x:Name="textBlock" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top">
+                        <Hyperlink NavigateUri="https://github.com/jschlackman/LuxaMic/" RequestNavigate="Hyperlink_RequestNavigate">
+                            https://github.com/jschlackman/LuxaMic/
+                        </Hyperlink>
+                    </Label>
+                    <Label x:Name="lblAbout" Margin="10,52,172,10" />
+                </Grid>
             </TabItem>
             <TabItem Header="Debug">
                 <Grid Background="#FFE5E5E5">
