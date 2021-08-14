@@ -12,6 +12,7 @@ using LuxaMic.Properties;
 using System.Timers;
 using System.Collections.ObjectModel;
 using LuxaforSharp;
+using System.Management;
 
 namespace LuxaMic
 {
@@ -227,6 +228,10 @@ namespace LuxaMic
             Colors = new StatusColors();
         }
 
+        /// <summary>
+        /// Initilizes the Luxafor hardware
+        /// </summary>
+        /// <returns>Debug log message iondicating how many devices were found.</returns>
         public string InitHardware()
         {
             string logMsg;
@@ -538,6 +543,7 @@ namespace LuxaMic
 
             InUseText = WindowsStrings.GetMicUseStrings();
             
+            // Initialize Luxafor devices
             txtDebugLog.Text += Settings.Default.luxSettings.InitHardware();
 
             btnMicInUse.Background = Settings.Default.luxSettings.Colors.MicInUse.ToBrush();
@@ -549,9 +555,32 @@ namespace LuxaMic
             // Check if program is correctly set to run at logon
             chkStartAtLogon.IsChecked = (Registry.CurrentUser.OpenSubKey(regWindowsRunKey).GetValue(regProgramValue,"").ToString() == "\"" + System.Windows.Forms.Application.ExecutablePath + "\"");
 
+            // Watch for hardware changes
+            var watcher = new ManagementEventWatcher();
+            var query = new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2 or EventType = 3 GROUP WITHIN 1");
+            watcher.EventArrived += new EventArrivedEventHandler(LFRDevices_Changed);
+            watcher.Query = query;
+            watcher.Start();
+
+
             // Run the first icon check now
             CheckNotificationIcons();
 
+        }
+
+        /// <summary>
+        /// Respond to hardware changes
+        /// </summary>
+        private void LFRDevices_Changed(object sender, EventArrivedEventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                txtDebugLog.Text += "Hardware change detected.\n";
+                txtDebugLog.Text += Settings.Default.luxSettings.InitHardware();
+            });
+            
+            // Run an icon check now
+            CheckNotificationIcons();
         }
 
 
