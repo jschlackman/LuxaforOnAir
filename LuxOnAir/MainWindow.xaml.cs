@@ -74,7 +74,7 @@ namespace LuxOnAir
             // If still no settings file, initialize defaults
             if (Settings.Default.luxSettings == null)
             {
-                WriteToDebug("No previous settings found, loading defaults and showing UI for first run.")
+                WriteToDebug("No previous settings found, loading defaults and showing UI for first run.");
                 Settings.Default.luxSettings = new LFRSettings();
                 
                 // Always show the UI on first run
