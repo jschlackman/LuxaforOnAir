@@ -73,7 +73,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AutomationElementHelpers.cs" />
+    <Compile Include="ColorHelper.cs" />
+    <Compile Include="LFRSettings.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="ShellEvents.cs" />
+    <Compile Include="StatusColors.cs" />
+    <Compile Include="WindowsStrings.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
