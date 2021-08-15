@@ -488,7 +488,7 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Initialise references and hooks to elements of the tray window (yes, the tray, not the just the notification area which is PART of the shell tray).
+        /// Initialize references and hooks to elements of the tray window (yes, the tray, not the just the notification area which is PART of the shell tray).
         /// </summary>
         public static void InitTrayHooks(StructureChangedEventHandler eventHandler)
         {
@@ -684,7 +684,7 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Initialise the notification icon for this application
+        /// Initialize the notification icon for this application
         /// </summary>
         private void InitNotifyIcon()
         {
@@ -721,7 +721,7 @@ namespace LuxOnAir
             notifyIcon = new NotifyIcon
             {
                 Icon = LuxOnAir.Properties.Resources.NotifyIcon,
-                Text = "LuxOnAir",
+                Text = System.Windows.Forms.Application.ProductName,
                 ContextMenuStrip = TrayIconContextMenu,
                 Visible = true,
             };
