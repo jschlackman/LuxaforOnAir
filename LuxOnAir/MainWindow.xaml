@@ -1,28 +1,28 @@
-﻿<Window x:Class="LuxaMic.MainWindow"
+﻿<Window x:Class="LuxOnAir.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LuxaMic"
+        xmlns:local="clr-namespace:LuxOnAir"
         mc:Ignorable="d"
-        Title="LuxaMic Settings" Height="285" Width="600" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="600" MinHeight="285" Visibility="Hidden">
+        Title="Luxafor On Air Settings" Height="285" Width="600" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="600" MinHeight="285" Visibility="Hidden">
     <Grid Margin="0,0,0,0">
         <Rectangle Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" Margin="0,0,0,0" Height="38" VerticalAlignment="Bottom"/>
 
         <TabControl x:Name="tabControl" Margin="10,10,8,44  ">
             <TabItem Header="General" HorizontalAlignment="Left" Height="20.8" VerticalAlignment="Top" Width="53.6">
                 <Grid Background="#FFE5E5E5">
-                    <CheckBox x:Name="chkStartAtLogon" Content="Automatically start program at Windows logon" HorizontalAlignment="Left" Margin="10,0,0,9.8" Checked="ChkStartAtLogon_Changed" Unchecked="ChkStartAtLogon_Changed" Height="15" VerticalAlignment="Bottom"/>
+                    <CheckBox x:Name="chkStartAtLogon" Content="Automatically start program at Windows logon" HorizontalAlignment="Left" Margin="10,0,0,9.8" Checked="ChkStartAtLogon_Changed" Unchecked="ChkStartAtLogon_Changed" Height="15" VerticalAlignment="Bottom" ToolTip="Start this program automatically when the current user logs on (does not affect other users)"/>
                     <Image x:Name="image" Margin="0,0,20,0" Source="AppIcon.ico" Stretch="None" HorizontalAlignment="Right" Width="128"/>
-                    <Button x:Name="btnMicInUse" Content="" HorizontalAlignment="Left" Margin="186,19,0,0" VerticalAlignment="Top" Width="75" Click="BtnMicInUse_Click" />
-                    <Button x:Name="btnMicNotInUse" Content="" HorizontalAlignment="Left" Margin="186,43,0,0" VerticalAlignment="Top" Width="75"  Click="BtnMicNotInUse_Click"/>
-                    <Button x:Name="btnLocked" Content="" HorizontalAlignment="Left" Margin="186,67,0,0" VerticalAlignment="Top" Width="75" Click="BtnLocked_Click"/>
-                    <CheckBox x:Name="chkInUseBlink" Content="Blink" HorizontalAlignment="Left" Margin="266,22,0,0" VerticalAlignment="Top" Checked="ChkInUseBlink_Changed" Unchecked="ChkInUseBlink_Changed"/>
+                    <Button x:Name="btnMicInUse" Content="" HorizontalAlignment="Left" Margin="186,19,0,0" VerticalAlignment="Top" Width="75" Click="BtnMicInUse_Click" ToolTip="Click to set the color displayed when the microphone is in use" />
+                    <Button x:Name="btnMicNotInUse" Content="" HorizontalAlignment="Left" Margin="186,43,0,0" VerticalAlignment="Top" Width="75"  Click="BtnMicNotInUse_Click" ToolTip="Click to set the color displayed when the microphone is not in use" />
+                    <Button x:Name="btnLocked" Content="" HorizontalAlignment="Left" Margin="186,67,0,0" VerticalAlignment="Top" Width="75" Click="BtnLocked_Click" ToolTip="Click to set the color displayed when the workstation console is locked (e.g. after pressing Win+L)"/>
+                    <CheckBox x:Name="chkInUseBlink" Content="Blink" HorizontalAlignment="Left" Margin="266,22,0,0" VerticalAlignment="Top" Checked="ChkInUseBlink_Changed" Unchecked="ChkInUseBlink_Changed" ToolTip="Periodically blink the light when the microphone is in use"/>
                     <Label x:Name="label" Content="Microphone In Use" HorizontalAlignment="Left" Margin="10,16,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="label1" Content="Color:" HorizontalAlignment="Left" Margin="144,16,0,0" VerticalAlignment="Top"/>
                     <Label x:Name="label_Copy" Content="Microphone Not Use" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="label1_Copy" Content="Color:" HorizontalAlignment="Left" Margin="144,40,0,0" VerticalAlignment="Top"/>
-                    <Label x:Name="label_Copy1" Content="Console Locked" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" FontWeight="Bold" Visibility="Hidden"/>
+                    <Label x:Name="label_Copy1" Content="Console Locked" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="label1_Copy1" Content="Color:" HorizontalAlignment="Left" Margin="144,64,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
@@ -31,8 +31,8 @@
                     <Label x:Name="lblProductVer" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold" Content=""/>
                     <Image x:Name="image_Copy" Margin="0,0,20,0" Source="AppIcon.ico" Stretch="None" HorizontalAlignment="Right" Width="128"/>
                     <Label x:Name="textBlock" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top">
-                        <Hyperlink NavigateUri="https://github.com/jschlackman/LuxaMic/" RequestNavigate="Hyperlink_RequestNavigate">
-                            https://github.com/jschlackman/LuxaMic/
+                        <Hyperlink NavigateUri="https://github.com/jschlackman/LuxaforOnAir/" RequestNavigate="Hyperlink_RequestNavigate">
+                            https://github.com/jschlackman/LuxaforOnAir/
                         </Hyperlink>
                     </Label>
                     <Label x:Name="lblAbout" Margin="10,52,172,10" />
@@ -46,8 +46,8 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button x:Name="btnExit" Content="Exit" Margin="0,0,8,10" Height="19" VerticalAlignment="Bottom" Click="ExitMenuItem_Click" HorizontalAlignment="Right" Width="75"/>
-        <Button x:Name="btnDone" Content="Done" Margin="0,0,88,10" Click="BtnDone_Click" Height="19" VerticalAlignment="Bottom" IsDefault="True" HorizontalAlignment="Right" Width="75"/>
+        <Button x:Name="btnExit" Content="Exit" Margin="0,0,8,10" Height="19" VerticalAlignment="Bottom" Click="ExitMenuItem_Click" HorizontalAlignment="Right" Width="75" ToolTip="Exit the application and turn off lights"/>
+        <Button x:Name="btnDone" Content="Done" Margin="0,0,88,10" Click="BtnDone_Click" Height="19" VerticalAlignment="Bottom" IsDefault="True" HorizontalAlignment="Right" Width="75" ToolTip="Apply settings and close this window without exiting the application"/>
 
     </Grid>
 </Window>

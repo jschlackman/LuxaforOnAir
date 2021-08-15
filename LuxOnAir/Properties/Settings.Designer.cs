@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LuxaMic.Properties {
+namespace LuxOnAir.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,9 +25,9 @@ namespace LuxaMic.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::LuxaMic.LFRSettings luxSettings {
+        public global::LuxOnAir.LFRSettings luxSettings {
             get {
-                return ((global::LuxaMic.LFRSettings)(this["luxSettings"]));
+                return ((global::LuxOnAir.LFRSettings)(this["luxSettings"]));
             }
             set {
                 this["luxSettings"] = value;

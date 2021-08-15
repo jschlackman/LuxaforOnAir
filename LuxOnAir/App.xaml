@@ -1,7 +1,7 @@
-﻿<Application x:Class="LuxaMic.App"
+﻿<Application x:Class="LuxOnAir.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:LuxaMic"
+             xmlns:local="clr-namespace:LuxOnAir"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

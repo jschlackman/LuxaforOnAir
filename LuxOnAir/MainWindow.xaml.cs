@@ -8,13 +8,14 @@ using System.Windows.Automation;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using LuxaMic.Properties;
+using LuxOnAir.Properties;
 using System.Timers;
 using LuxaforSharp;
 using System.Management;
 
-namespace LuxaMic
+namespace LuxOnAir
 {
+
     /// <summary>
     /// Helper class from https://devblogs.microsoft.com/oldnewthing/20141013-00/?p=43863
     /// </summary>
@@ -107,8 +108,8 @@ namespace LuxaMic
             {
                 // Load each known string resource (using en-US defaults if not found)
                 moduleStrings.Add(Load(libraryHandle, 2045, "Your microphone is currently in use"));
-                moduleStrings.Add(Load(libraryHandle, 2046, "%1 is using your microphone").Remove(0, 3));
-                moduleStrings.Add(Load(libraryHandle, 2047, "%1 apps are using your microphone").Remove(0, 3));
+                moduleStrings.Add(Load(libraryHandle, 2046, "{0} is using your microphone").Remove(0, 3));
+                moduleStrings.Add(Load(libraryHandle, 2047, "{0} apps are using your microphone").Remove(0, 3));
                 moduleStrings.Add(Load(libraryHandle, 2052, "1 app is using your microphone"));
 
                 // Free handle to external library
@@ -245,7 +246,7 @@ namespace LuxaMic
             }
             else
             {
-                logMsg = devices.Count().ToString() + " Luxafor light" + ((devices.Count() != 1) ? "s":"") + " ready.";
+                logMsg = string.Format("{0} Luxafor light{1} ready.", devices.Count().ToString(), ((devices.Count() != 1) ? "s":""));
             }
 
             return logMsg;
@@ -359,8 +360,6 @@ namespace LuxaMic
             currentColor = System.Drawing.Color.Black;
             SetAllLights(currentColor);
         }
-
-
     }
 
     public static class ColorHelper
@@ -375,7 +374,6 @@ namespace LuxaMic
             var color = System.Drawing.Color.FromArgb(argbColor);
             return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B));
         }
-
     }
 
 
@@ -529,7 +527,7 @@ namespace LuxaMic
 
         // Registry key & value for autorun entry
         private const string regWindowsRunKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
-        private const string regProgramValue = "LuxaMic";
+        private const string regProgramValue = "LuxOnAir";
 
         /// <summary>
         /// Watches for system hardware changes (e.g. USB connect/disconnect)
@@ -551,7 +549,7 @@ namespace LuxaMic
             
             InitializeComponent();
             
-            lblProductVer.Content = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            lblProductVer.Content = String.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
             lblAbout.Content = "by James Schlackman\n\nThis software uses functionality from the following libraries:\n• LuxaforSharp by Edouard Paumier\n• HidLibrary by Mike O'Brien, Austin Mullins, and other contributors.";
 
             ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
@@ -559,6 +557,10 @@ namespace LuxaMic
 
             InitNotifyIcon();
 
+            // If not settings file, attempt to upgrade from previous version's settings
+            if (Settings.Default.luxSettings == null) { Settings.Default.Upgrade(); }
+
+            // If still no settings file, initialize defaults
             if (Settings.Default.luxSettings == null)
             {
                 Settings.Default.luxSettings = new LFRSettings();
@@ -579,7 +581,7 @@ namespace LuxaMic
             chkInUseBlink.IsChecked = Settings.Default.luxSettings.Colors.BlinkMicInUse;
 
             // Check if program is correctly set to run at logon
-            chkStartAtLogon.IsChecked = (Registry.CurrentUser.OpenSubKey(regWindowsRunKey).GetValue(regProgramValue,"").ToString() == "\"" + System.Windows.Forms.Application.ExecutablePath + "\"");
+            chkStartAtLogon.IsChecked = (Registry.CurrentUser.OpenSubKey(regWindowsRunKey).GetValue(regProgramValue,"").ToString() == String.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
 
             // Watch for hardware changes
             hardwareWatcher = new ManagementEventWatcher
@@ -718,8 +720,8 @@ namespace LuxaMic
             // Define the notification icon 
             notifyIcon = new NotifyIcon
             {
-                Icon = LuxaMic.Properties.Resources.NotifyIcon,
-                Text = "LuxaMic",
+                Icon = LuxOnAir.Properties.Resources.NotifyIcon,
+                Text = "LuxOnAir",
                 ContextMenuStrip = TrayIconContextMenu,
                 Visible = true,
             };
@@ -919,7 +921,7 @@ namespace LuxaMic
             // If checked, set the correct registry value
             if ((bool)chkStartAtLogon.IsChecked)
             {
-                windowsRun.SetValue(regProgramValue, "\"" + System.Windows.Forms.Application.ExecutablePath + "\"");
+                windowsRun.SetValue(regProgramValue, string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
             }
             else
             {
