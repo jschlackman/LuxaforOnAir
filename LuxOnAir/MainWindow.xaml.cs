@@ -60,7 +60,7 @@ namespace LuxOnAir
             
             InitializeComponent();
             
-            lblProductVer.Content = String.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
+            lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
             lblAbout.Content = "by James Schlackman\n\nThis software uses functionality from the following libraries:\n• LuxaforSharp by Edouard Paumier\n• HidLibrary by Mike O'Brien, Austin Mullins, and other contributors.";
 
             ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
@@ -74,6 +74,7 @@ namespace LuxOnAir
             // If still no settings file, initialize defaults
             if (Settings.Default.luxSettings == null)
             {
+                WriteToDebug("No previous settings found, loading defaults and showing UI for first run.")
                 Settings.Default.luxSettings = new LFRSettings();
                 
                 // Always show the UI on first run
@@ -92,7 +93,7 @@ namespace LuxOnAir
             chkInUseBlink.IsChecked = Settings.Default.luxSettings.Colors.BlinkMicInUse;
 
             // Check if program is correctly set to run at logon
-            chkStartAtLogon.IsChecked = (Registry.CurrentUser.OpenSubKey(regWindowsRunKey).GetValue(regProgramValue,"").ToString() == String.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
+            chkStartAtLogon.IsChecked = GetRunAtLogon();
 
             // Watch for hardware changes
             hardwareWatcher = new ManagementEventWatcher
@@ -113,6 +114,43 @@ namespace LuxOnAir
             // Run the first icon check now
             CheckNotificationIcons();
 
+        }
+
+        /// <summary>
+        /// Determines whether the application is set to run automatically when the user logs on
+        /// </summary>
+        private bool GetRunAtLogon()
+        {
+            // Check if registry value exists and has the correct value for the current app path
+            return Registry.CurrentUser.OpenSubKey(regWindowsRunKey).GetValue(regProgramValue, "").ToString() == string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath);
+        }
+
+        /// <summary>
+        /// Sets whether the application is set to run automatically when the user logs on
+        /// </summary>
+        private void SetRunAtLogon(bool value)
+        {
+            // Get reference to the current user's Windows Run key with edit permissions
+            RegistryKey windowsRun = Registry.CurrentUser.OpenSubKey(regWindowsRunKey, true);
+
+            if (value)
+            {
+                // If not already set to run at logon, set the correct registry key now
+                if (!GetRunAtLogon())
+                {
+                    windowsRun.SetValue(regProgramValue, string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
+                    WriteToDebug(string.Format("Added registry key at {0} to run app at startup.", windowsRun.Name));
+                }
+            }
+            else
+            {
+                // Check for the presence of the startup registry value and remove it
+                if (windowsRun.GetValue(regProgramValue) != null)
+                {
+                    windowsRun.DeleteValue(regProgramValue);
+                    WriteToDebug(string.Format("Removed registry key from {0}, app will no longer run at startup.", windowsRun.Name));
+                }
+            }
         }
 
         /// <summary>
@@ -421,22 +459,8 @@ namespace LuxOnAir
 
         private void ChkStartAtLogon_Changed(object sender, RoutedEventArgs e)
         {
-            // Get reference to the current user's Windows Run key with edit permissions
-            RegistryKey windowsRun = Registry.CurrentUser.OpenSubKey(regWindowsRunKey, true);
-
-            // If checked, set the correct registry value
-            if ((bool)chkStartAtLogon.IsChecked)
-            {
-                windowsRun.SetValue(regProgramValue, string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
-            }
-            else
-            {
-                // Check for the presence of the startup registry value and remove it
-                if (windowsRun.GetValue(regProgramValue) != null)
-                {
-                    windowsRun.DeleteValue(regProgramValue);
-                }
-            }
+            // Set the correct registry value to match whether the box is checked
+            SetRunAtLogon((bool)chkStartAtLogon.IsChecked);
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
