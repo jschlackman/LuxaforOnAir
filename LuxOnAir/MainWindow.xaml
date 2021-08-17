@@ -48,6 +48,8 @@
         </TabControl>
         <Button x:Name="btnExit" Content="Exit" Margin="0,0,8,10" Height="19" VerticalAlignment="Bottom" Click="ExitMenuItem_Click" HorizontalAlignment="Right" Width="75" ToolTip="Exit the application and turn off lights"/>
         <Button x:Name="btnDone" Content="Done" Margin="0,0,88,10" Click="BtnDone_Click" Height="19" VerticalAlignment="Bottom" IsDefault="True" HorizontalAlignment="Right" Width="75" ToolTip="Apply settings and close this window without exiting the application"/>
+        <Ellipse x:Name="elpStatus" Fill="#FFF4F4F5" Margin="10,0,0,12" Stroke="Black" Height="14" Width="14" VerticalAlignment="Bottom" HorizontalAlignment="Left" StrokeThickness="2"/>
+        <Label x:Name="lblStatus" Content="Device status" HorizontalAlignment="Left" Margin="26,0,0,6" Height="26" VerticalAlignment="Bottom" IsEnabled="False" Foreground="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
 
     </Grid>
 </Window>

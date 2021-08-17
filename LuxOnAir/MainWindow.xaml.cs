@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using System.Windows.Forms;
 using LuxOnAir.Properties;
 using System.Management;
+using System.Windows.Media;
 
 namespace LuxOnAir
 {
@@ -86,6 +87,9 @@ namespace LuxOnAir
             // Initialize Luxafor devices
             WriteToDebug(Settings.Default.luxSettings.InitHardware());
 
+            // Update the device status UI
+            UpdateDeviceStatus();
+
             btnMicInUse.Background = Settings.Default.luxSettings.Colors.MicInUse.ToBrush();
             btnMicNotInUse.Background = Settings.Default.luxSettings.Colors.MicNotInUse.ToBrush();
             btnLocked.Background = Settings.Default.luxSettings.Colors.SessionLocked.ToBrush();
@@ -160,9 +164,36 @@ namespace LuxOnAir
         {
             WriteToDebug("Hardware change detected.");
             WriteToDebug(Settings.Default.luxSettings.InitHardware());
-            
+
+            // Update the device status UI
+            UpdateDeviceStatus();
             // Run an icon check now
             CheckNotificationIcons();
+        }
+
+        /// <summary>
+        /// Update the indicator on the mains ettings screen to show how many devices are connected
+        /// </summary>
+        private void UpdateDeviceStatus()
+        {
+            // Thread-safe UI update
+            Dispatcher.Invoke(() =>
+            {
+                lblStatus.Content = Settings.Default.luxSettings.InitHardware();
+
+                if (Settings.Default.luxSettings.ConnectedDeviceCount() == 0)
+                {
+                    // Red status indicator
+                    elpStatus.Fill = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0x58, 0x58));
+                    elpStatus.Stroke = new SolidColorBrush(Color.FromArgb(0xFF, 0xB7, 0, 0));
+                }
+                else
+                {
+                    // Green status indicator
+                    elpStatus.Fill = new SolidColorBrush(Color.FromArgb(0xFF, 0x55, 0xBB, 0x55));
+                    elpStatus.Stroke = new SolidColorBrush(Color.FromArgb(0xFF, 0, 0xB6, 0));
+                }
+            });
         }
 
         /// <summary>

@@ -69,25 +69,39 @@ namespace LuxOnAir
         /// <summary>
         /// Initilizes the Luxafor hardware
         /// </summary>
-        /// <returns>Debug log message indicating how many devices were found.</returns>
+        /// <returns>Text message indicating how many devices were found.</returns>
         public string InitHardware()
         {
-            string logMsg;
-            
-            // Now create a new device controller
+            // Create a new device controller
             devices = new DeviceList();
             devices.Scan();
 
+            return ConnectedDeviceDesc();
+        }
+
+        /// <summary>
+        /// Gets the number Luxafor devices currently connected.
+        /// </summary>
+        /// <returns>Numerical count of devices connected.</returns>
+        public int ConnectedDeviceCount()
+        {
+            return (devices == null ? 0 : devices.Count());
+        }
+
+        /// <summary>
+        /// Generates a text description of how many Luxafor devices are currently connected.
+        /// </summary>
+        /// <returns>User-friendly text describing how many Luxafor devices are connected.</returns>
+        public string ConnectedDeviceDesc()
+        {
             if (devices.Count() == 0)
             {
-                logMsg = "No Luxafor light available.";
+                return "No Luxafor light connected.";
             }
             else
             {
-                logMsg = string.Format("{0} Luxafor light{1} ready.", devices.Count().ToString(), (devices.Count() != 1) ? "s" : "");
+                return string.Format("{0} Luxafor light{1} connected.", devices.Count().ToString(), (devices.Count() != 1) ? "s" : "");
             }
-
-            return logMsg;
         }
 
         /// <summary>
