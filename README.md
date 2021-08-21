@@ -3,7 +3,8 @@ Windows 10 app to set [Luxafor RGB lights](https://luxafor.com/products/) accord
 
 ## Requirements
 
-* Windows 10 is required.
+* **Windows 10** is required (earlier versions of Windows do not have the 'microphone in use' notification feature that this app relies on).
+* **[.NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net472-web-installer)** runtime (or later) is required. This is installed by default with all versions of Windows 10 currently supported by Microsoft.
 * The built-in notification icon that indicates when the microphone is in use must be visible in the notification area (this is the default setting in Windows). If the user hides it in the notification overflow area, this app will not be able to detect when the microphone is in use.
 * The official [Luxafor software](https://luxafor.com/download/) is **not** required, but if it is installed it should not be run at the same time as Luxafor On Air. The official software will override color changes made by this app.
 
