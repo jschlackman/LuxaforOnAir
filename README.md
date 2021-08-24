@@ -1,6 +1,12 @@
 # Luxafor On Air
 Windows 10 app to set [Luxafor RGB lights](https://luxafor.com/products/) according to whether your microphone is in use by other applications. Allows you to use your Luxafor lights as an 'on air' indicator to show when you are taking part in a web meeting and should not be disturbed, regardless of the meeting software you are using.
 
+## Quick Start
+
+* Check the Requirements below.
+* Download the latest release from the [releases page](https://github.com/jschlackman/LuxaforOnAir/releases) and install.
+* Run **Luxafor On Air** from the new Start Menu shortcut.
+
 ## Requirements
 
 * **Windows 10 version 1903 (May 2019 Update)** is required. Earlier versions of Windows do not have the 'microphone in use' notification feature that this app relies on.
