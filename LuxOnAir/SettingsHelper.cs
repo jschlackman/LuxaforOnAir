@@ -17,7 +17,7 @@ namespace LuxOnAir
         /// <summary>
         /// About text for this app
         /// </summary>
-        public static string About => "by James Schlackman\n\nThis software uses functionality from the following libraries:\n• LuxaforSharp by Edouard Paumier\n• HidLibrary by Mike O'Brien, Austin Mullins, and other contributors.";
+        public const string About = "by James Schlackman\n\nThis software uses functionality from the following libraries:\n• LuxaforSharp by Edouard Paumier\n• HidLibrary by Mike O'Brien, Austin Mullins, and other contributors.";
 
         /// <summary>
         /// Load previous settings from configuration file, or initialize defaults for the specific light type if no previous settings saved
