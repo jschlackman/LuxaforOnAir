@@ -41,6 +41,11 @@ namespace LuxOnAir
         [NonSerialized] 
         private const int blinkPeriod = 3000;
 
+        /// <summary>
+        /// Text description of a Luxafor light
+        /// </summary>
+        internal override string LightDescription => "Luxafor light";
+
         public LFRSettings()
         {
             Colors = new StatusColors();
@@ -66,22 +71,6 @@ namespace LuxOnAir
         public override int ConnectedDeviceCount()
         {
             return (devices == null ? 0 : devices.Count());
-        }
-
-        /// <summary>
-        /// Generates a text description of how many Luxafor devices are currently connected.
-        /// </summary>
-        /// <returns>User-friendly text describing how many Luxafor devices are connected.</returns>
-        public override string ConnectedDeviceDesc()
-        {
-            if (devices.Count() == 0)
-            {
-                return "No Luxafor light connected.";
-            }
-            else
-            {
-                return string.Format("{0} Luxafor light{1} connected.", devices.Count().ToString(), (devices.Count() != 1) ? "s" : "");
-            }
         }
 
         /// <summary>

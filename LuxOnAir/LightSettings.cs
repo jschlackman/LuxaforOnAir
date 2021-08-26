@@ -28,12 +28,6 @@ namespace LuxOnAir
         public abstract int ConnectedDeviceCount();
 
         /// <summary>
-        /// Generates a text description of how many RGB devices are currently connected.
-        /// </summary>
-        /// <returns>User-friendly text describing how many RGB devices are connected.</returns>
-        public abstract string ConnectedDeviceDesc();
-
-        /// <summary>
         /// Turn all RGB lights off
         /// </summary>
         public abstract void SetLightsOff();
@@ -52,5 +46,30 @@ namespace LuxOnAir
         /// Set RGB lights to in-use status
         /// </summary>
         public abstract void SetInUse();
+
+        /// <summary>
+        /// Text decription of this type of RGB light
+        /// </summary>
+        internal abstract string LightDescription
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Generates a text description of how many RGB devices are currently connected.
+        /// </summary>
+        /// <returns>User-friendly text describing how many RGB devices are connected.</returns>
+        public string ConnectedDeviceDesc()
+        {
+            int devCount = ConnectedDeviceCount();
+            if (devCount == 0)
+            {
+                return string.Format("No {0} connected.", LightDescription);
+            }
+            else
+            {
+                return string.Format("{0} {1}{2} connected.", devCount.ToString(), LightDescription, (devCount != 1) ? "s" : "");
+            }
+        }
     }
 }
