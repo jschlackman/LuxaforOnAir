@@ -46,6 +46,8 @@ namespace LuxOnAir
         /// </summary>
         internal override string LightDescription => "Luxafor light";
 
+        public override int InitSeconds => 1;
+
         public LFRSettings()
         {
             Colors = new StatusColors();

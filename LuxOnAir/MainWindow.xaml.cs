@@ -94,7 +94,7 @@ namespace LuxOnAir
             // Watch for hardware changes
             hardwareWatcher = new ManagementEventWatcher
             {
-                Query = new WqlEventQuery("SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' GROUP WITHIN 1")
+                Query = new WqlEventQuery("SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' GROUP WITHIN " + Settings.Default.Lights.InitSeconds.ToString())
             };
             hardwareWatcher.EventArrived += USBDevices_Changed;
             hardwareWatcher.Start();

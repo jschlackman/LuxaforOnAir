@@ -48,9 +48,17 @@ namespace LuxOnAir
         public abstract void SetInUse();
 
         /// <summary>
-        /// Text decription of this type of RGB light
+        /// Text description of this type of RGB light
         /// </summary>
         internal abstract string LightDescription
+        {
+            get;
+        }
+
+        /// <summary>
+        /// How many seconds this light type typically takes to initialize
+        /// </summary>
+        public abstract int InitSeconds
         {
             get;
         }
