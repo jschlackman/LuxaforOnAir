@@ -54,14 +54,11 @@ namespace LuxOnAir
         /// <summary>
         /// Initilizes the Luxafor hardware
         /// </summary>
-        /// <returns>Text message indicating how many devices were found.</returns>
-        public override string InitHardware()
+        public override void InitHardware()
         {
             // Create a new device controller
             devices = new DeviceList();
             devices.Scan();
-
-            return ConnectedDeviceDesc();
         }
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace LuxOnAir
         /// Initilizes the RGB light hardware
         /// </summary>
         /// <returns>Text message indicating how many light devices were found.</returns>
-        public abstract string InitHardware();
+        public abstract void InitHardware();
 
         /// <summary>
         /// Shutdown RGB lighting

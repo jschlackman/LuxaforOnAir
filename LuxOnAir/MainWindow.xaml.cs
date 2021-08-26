@@ -74,9 +74,10 @@ namespace LuxOnAir
             }
 
             InUseText = WindowsStrings.GetMicUseStrings();
-            
+
             // Initialize devices
-            WriteToDebug(Settings.Default.Lights.InitHardware());
+            Settings.Default.Lights.InitHardware();
+            WriteToDebug(Settings.Default.Lights.ConnectedDeviceDesc());
 
             // Update the device status UI
             UpdateDeviceStatus();
@@ -154,7 +155,8 @@ namespace LuxOnAir
         private void USBDevices_Changed(object sender, EventArrivedEventArgs e)
         {
             WriteToDebug("Hardware change detected.");
-            WriteToDebug(Settings.Default.Lights.InitHardware());
+            Settings.Default.Lights.InitHardware();
+            WriteToDebug(Settings.Default.Lights.ConnectedDeviceDesc());
 
             // Update the device status UI
             UpdateDeviceStatus();
