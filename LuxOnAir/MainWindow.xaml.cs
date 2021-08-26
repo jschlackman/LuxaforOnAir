@@ -163,14 +163,14 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Update the indicator on the mains ettings screen to show how many devices are connected
+        /// Update the indicator on the main settings screen to show how many devices are connected
         /// </summary>
         private void UpdateDeviceStatus()
         {
             // Thread-safe UI update
             Dispatcher.Invoke(() =>
             {
-                lblStatus.Content = Settings.Default.Lights.InitHardware();
+                lblStatus.Content = Settings.Default.Lights.ConnectedDeviceDesc();
 
                 if (Settings.Default.Lights.ConnectedDeviceCount() == 0)
                 {
