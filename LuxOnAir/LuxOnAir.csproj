@@ -76,7 +76,9 @@
     <Compile Include="AutomationElementHelpers.cs" />
     <Compile Include="ColorHelper.cs" />
     <Compile Include="LFRSettings.cs" />
+    <Compile Include="LightSettings.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="SettingsHelper.cs" />
     <Compile Include="ShellEvents.cs" />
     <Compile Include="StatusColors.cs" />
     <Compile Include="WindowsStrings.cs" />

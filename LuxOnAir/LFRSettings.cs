@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Linq;
 using System.Timers;
 using LuxaforSharp;
@@ -10,18 +9,8 @@ namespace LuxOnAir
     /// <summary>
     /// Luxafor user settings
     /// </summary>
-    [SettingsSerializeAs(SettingsSerializeAs.Xml)]
-    public class LFRSettings
+    public class LFRSettings : LightSettings
     {
-        /// <summary>
-        /// Whether the user has enabled use of Luxafor lighting
-        /// </summary>
-        public bool Enabled;
-        /// <summary>
-        /// User color settings for Luxafor lights
-        /// </summary>
-        public StatusColors Colors;
-        
         [NonSerialized]
         private IDeviceList devices;
 
@@ -29,18 +18,9 @@ namespace LuxOnAir
         /// Indicates whether Luxafor lighting is available on this system
         /// </summary>
         /// <returns></returns>
-        public bool Available()
+        private bool Available()
         {
             return (devices != null);
-        }
-
-        /// <summary>
-        /// Indicates whether Luxafor lighting is available and enabled for use by the user
-        /// </summary>
-        /// <returns></returns>
-        public bool Active()
-        {
-            return Enabled && Available();
         }
 
         /// <summary>
@@ -58,11 +38,11 @@ namespace LuxOnAir
         /// <summary>
         /// Number of ms between blinks
         /// </summary>
+        [NonSerialized] 
         private const int blinkPeriod = 3000;
 
         public LFRSettings()
         {
-            Enabled = true;
             Colors = new StatusColors();
         }
 
@@ -70,7 +50,7 @@ namespace LuxOnAir
         /// Initilizes the Luxafor hardware
         /// </summary>
         /// <returns>Text message indicating how many devices were found.</returns>
-        public string InitHardware()
+        public override string InitHardware()
         {
             // Create a new device controller
             devices = new DeviceList();
@@ -80,10 +60,10 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Gets the number Luxafor devices currently connected.
+        /// Gets the number of Luxafor devices currently connected.
         /// </summary>
         /// <returns>Numerical count of devices connected.</returns>
-        public int ConnectedDeviceCount()
+        public override int ConnectedDeviceCount()
         {
             return (devices == null ? 0 : devices.Count());
         }
@@ -92,7 +72,7 @@ namespace LuxOnAir
         /// Generates a text description of how many Luxafor devices are currently connected.
         /// </summary>
         /// <returns>User-friendly text describing how many Luxafor devices are connected.</returns>
-        public string ConnectedDeviceDesc()
+        public override string ConnectedDeviceDesc()
         {
             if (devices.Count() == 0)
             {
@@ -107,7 +87,7 @@ namespace LuxOnAir
         /// <summary>
         /// Shutdown Luxafor lighting
         /// </summary>
-        public void ShutdownHardware()
+        public override void ShutdownHardware()
         {
             if (Available())
             {
@@ -179,7 +159,7 @@ namespace LuxOnAir
         /// <summary>
         /// Set Luxafor lights to in-use status
         /// </summary>
-        public void SetInUse()
+        public override void SetInUse()
         {
             currentColor = System.Drawing.Color.FromArgb(Colors.MicInUse);
             SetAllLights(currentColor);
@@ -189,7 +169,7 @@ namespace LuxOnAir
         /// <summary>
         /// Set Luxafor lights to not-in-use status
         /// </summary>
-        public void SetNotInUse()
+        public override void SetNotInUse()
         {
             StopBlink();
             currentColor = System.Drawing.Color.FromArgb(Colors.MicNotInUse);
@@ -199,14 +179,17 @@ namespace LuxOnAir
         /// <summary>
         /// Set Luxafor lights to locked status
         /// </summary>
-        public void SetLocked()
+        public override void SetLocked()
         {
             StopBlink();
             currentColor = System.Drawing.Color.FromArgb(Colors.SessionLocked);
             SetAllLights(currentColor);
         }
 
-        public void SetLightsOff()
+        /// <summary>
+        /// Turn all Luxafor lights off
+        /// </summary>
+        public override void SetLightsOff()
         {
             currentColor = System.Drawing.Color.Black;
             SetAllLights(currentColor);

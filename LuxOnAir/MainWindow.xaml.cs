@@ -16,7 +16,6 @@ namespace LuxOnAir
         /// </summary>
         public partial class MainWindow : Window
     {
-
         /// <summary>
         /// Indicate if the application should fully exit when closing a window.
         /// </summary>
@@ -36,10 +35,6 @@ namespace LuxOnAir
         /// Handles session switch events
         /// </summary>
         private static SessionSwitchEventHandler SessionSwitchHandler;
-
-        // Registry key & value for autorun entry
-        private const string regWindowsRunKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
-        private const string regProgramValue = "LuxOnAir";
 
         /// <summary>
         /// Watches for system hardware changes (e.g. USB connect/disconnect)
@@ -62,21 +57,17 @@ namespace LuxOnAir
             InitializeComponent();
             
             lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
-            lblAbout.Content = "by James Schlackman\n\nThis software uses functionality from the following libraries:\n• LuxaforSharp by Edouard Paumier\n• HidLibrary by Mike O'Brien, Austin Mullins, and other contributors.";
+            lblAbout.Content = SettingsHelper.About;
 
             ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
             SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
 
             InitNotifyIcon();
 
-            // If not settings file, attempt to upgrade from previous version's settings
-            if (Settings.Default.luxSettings == null) { Settings.Default.Upgrade(); }
-
-            // If still no settings file, initialize defaults
-            if (Settings.Default.luxSettings == null)
+            // Try to load settings, init defaults and show UI if no previous settings found
+            if (!SettingsHelper.LoadSettings())
             {
                 WriteToDebug("No previous settings found, loading defaults and showing UI for first run.");
-                Settings.Default.luxSettings = new LFRSettings();
                 
                 // Always show the UI on first run
                 Visibility = Visibility.Visible;
@@ -84,17 +75,17 @@ namespace LuxOnAir
 
             InUseText = WindowsStrings.GetMicUseStrings();
             
-            // Initialize Luxafor devices
-            WriteToDebug(Settings.Default.luxSettings.InitHardware());
+            // Initialize devices
+            WriteToDebug(Settings.Default.Lights.InitHardware());
 
             // Update the device status UI
             UpdateDeviceStatus();
 
-            btnMicInUse.Background = Settings.Default.luxSettings.Colors.MicInUse.ToBrush();
-            btnMicNotInUse.Background = Settings.Default.luxSettings.Colors.MicNotInUse.ToBrush();
-            btnLocked.Background = Settings.Default.luxSettings.Colors.SessionLocked.ToBrush();
+            btnMicInUse.Background = Settings.Default.Lights.Colors.MicInUse.ToBrush();
+            btnMicNotInUse.Background = Settings.Default.Lights.Colors.MicNotInUse.ToBrush();
+            btnLocked.Background = Settings.Default.Lights.Colors.SessionLocked.ToBrush();
 
-            chkInUseBlink.IsChecked = Settings.Default.luxSettings.Colors.BlinkMicInUse;
+            chkInUseBlink.IsChecked = Settings.Default.Lights.Colors.BlinkMicInUse;
 
             // Check if program is correctly set to run at logon
             chkStartAtLogon.IsChecked = GetRunAtLogon();
@@ -104,7 +95,7 @@ namespace LuxOnAir
             {
                 Query = new WqlEventQuery("SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' GROUP WITHIN 1")
             };
-            hardwareWatcher.EventArrived += LFRDevices_Changed;
+            hardwareWatcher.EventArrived += USBDevices_Changed;
             hardwareWatcher.Start();
 
             // Watch for power changes
@@ -126,7 +117,7 @@ namespace LuxOnAir
         private bool GetRunAtLogon()
         {
             // Check if registry value exists and has the correct value for the current app path
-            return Registry.CurrentUser.OpenSubKey(regWindowsRunKey).GetValue(regProgramValue, "").ToString() == string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath);
+            return Registry.CurrentUser.OpenSubKey(SettingsHelper.RegWindowsRunKey).GetValue(SettingsHelper.RegProgramValue, "").ToString() == string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath);
         }
 
         /// <summary>
@@ -135,23 +126,23 @@ namespace LuxOnAir
         private void SetRunAtLogon(bool value)
         {
             // Get reference to the current user's Windows Run key with edit permissions
-            RegistryKey windowsRun = Registry.CurrentUser.OpenSubKey(regWindowsRunKey, true);
+            RegistryKey windowsRun = Registry.CurrentUser.OpenSubKey(SettingsHelper.RegWindowsRunKey, true);
 
             if (value)
             {
                 // If not already set to run at logon, set the correct registry key now
                 if (!GetRunAtLogon())
                 {
-                    windowsRun.SetValue(regProgramValue, string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
+                    windowsRun.SetValue(SettingsHelper.RegProgramValue, string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
                     WriteToDebug(string.Format("Added registry key at {0} to run app at startup.", windowsRun.Name));
                 }
             }
             else
             {
                 // Check for the presence of the startup registry value and remove it
-                if (windowsRun.GetValue(regProgramValue) != null)
+                if (windowsRun.GetValue(SettingsHelper.RegProgramValue) != null)
                 {
-                    windowsRun.DeleteValue(regProgramValue);
+                    windowsRun.DeleteValue(SettingsHelper.RegProgramValue);
                     WriteToDebug(string.Format("Removed registry key from {0}, app will no longer run at startup.", windowsRun.Name));
                 }
             }
@@ -160,10 +151,10 @@ namespace LuxOnAir
         /// <summary>
         /// Respond to hardware changes
         /// </summary>
-        private void LFRDevices_Changed(object sender, EventArrivedEventArgs e)
+        private void USBDevices_Changed(object sender, EventArrivedEventArgs e)
         {
             WriteToDebug("Hardware change detected.");
-            WriteToDebug(Settings.Default.luxSettings.InitHardware());
+            WriteToDebug(Settings.Default.Lights.InitHardware());
 
             // Update the device status UI
             UpdateDeviceStatus();
@@ -179,9 +170,9 @@ namespace LuxOnAir
             // Thread-safe UI update
             Dispatcher.Invoke(() =>
             {
-                lblStatus.Content = Settings.Default.luxSettings.InitHardware();
+                lblStatus.Content = Settings.Default.Lights.InitHardware();
 
-                if (Settings.Default.luxSettings.ConnectedDeviceCount() == 0)
+                if (Settings.Default.Lights.ConnectedDeviceCount() == 0)
                 {
                     // Red status indicator
                     elpStatus.Fill = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0x58, 0x58));
@@ -212,7 +203,7 @@ namespace LuxOnAir
                         WriteToDebug("System entering Suspend, turning lights off.");
                         Dispatcher.Invoke(() =>
                         {
-                            Settings.Default.luxSettings.SetLightsOff();
+                            Settings.Default.Lights.SetLightsOff();
                         });
                     } 
                     // Resuming from suspend
@@ -244,7 +235,7 @@ namespace LuxOnAir
                 default:
                     WriteToDebug("Console session locked. Setting to Locked color.");
                     bConsoleLocked = true;
-                    Settings.Default.luxSettings.SetLocked();
+                    Settings.Default.Lights.SetLocked();
                 break;
             }
         }
@@ -331,18 +322,18 @@ namespace LuxOnAir
 
             if (bConsoleLocked)
             {
-                Settings.Default.luxSettings.SetLocked();
+                Settings.Default.Lights.SetLocked();
             }
             // Check if any of the in use strings are currently being displayed by a notification icon
             else if (InUseText.Any(s => iconNames.Contains(s + "\n")))
             {
                 // Trigger mic in use lights
-                Settings.Default.luxSettings.SetInUse();
+                Settings.Default.Lights.SetInUse();
             }
             else
             {
                 // Trigger mic not in use lights
-                Settings.Default.luxSettings.SetNotInUse();
+                Settings.Default.Lights.SetNotInUse();
             }
 
             return iconNames;
@@ -402,7 +393,7 @@ namespace LuxOnAir
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            Settings.Default.luxSettings.ShutdownHardware();
+            Settings.Default.Lights.ShutdownHardware();
             ShellEvents.DisposeTrayHooks();
             SystemEvents.SessionSwitch -= SessionSwitchHandler;
 
@@ -418,13 +409,13 @@ namespace LuxOnAir
         {
             ColorDialog colorDialog = new ColorDialog()
             {
-                Color = System.Drawing.Color.FromArgb(Settings.Default.luxSettings.Colors.MicInUse)
+                Color = System.Drawing.Color.FromArgb(Settings.Default.Lights.Colors.MicInUse)
             };
 
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Settings.Default.luxSettings.Colors.MicInUse = colorDialog.Color.ToArgb();
-                btnMicInUse.Background = Settings.Default.luxSettings.Colors.MicInUse.ToBrush();
+                Settings.Default.Lights.Colors.MicInUse = colorDialog.Color.ToArgb();
+                btnMicInUse.Background = Settings.Default.Lights.Colors.MicInUse.ToBrush();
                 ApplySettings();
             }
         }
@@ -433,13 +424,13 @@ namespace LuxOnAir
         {
             ColorDialog colorDialog = new ColorDialog()
             {
-                Color = System.Drawing.Color.FromArgb(Settings.Default.luxSettings.Colors.MicNotInUse)
+                Color = System.Drawing.Color.FromArgb(Settings.Default.Lights.Colors.MicNotInUse)
             };
 
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Settings.Default.luxSettings.Colors.MicNotInUse = colorDialog.Color.ToArgb();
-                btnMicNotInUse.Background = Settings.Default.luxSettings.Colors.MicNotInUse.ToBrush();
+                Settings.Default.Lights.Colors.MicNotInUse = colorDialog.Color.ToArgb();
+                btnMicNotInUse.Background = Settings.Default.Lights.Colors.MicNotInUse.ToBrush();
                 ApplySettings();
             }
         }
@@ -448,13 +439,13 @@ namespace LuxOnAir
         {
             ColorDialog colorDialog = new ColorDialog()
             {
-                Color = System.Drawing.Color.FromArgb(Settings.Default.luxSettings.Colors.SessionLocked)
+                Color = System.Drawing.Color.FromArgb(Settings.Default.Lights.Colors.SessionLocked)
             };
 
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Settings.Default.luxSettings.Colors.SessionLocked = colorDialog.Color.ToArgb();
-                btnLocked.Background = Settings.Default.luxSettings.Colors.SessionLocked.ToBrush();
+                Settings.Default.Lights.Colors.SessionLocked = colorDialog.Color.ToArgb();
+                btnLocked.Background = Settings.Default.Lights.Colors.SessionLocked.ToBrush();
                 ApplySettings();
             }
         }
@@ -484,7 +475,7 @@ namespace LuxOnAir
 
         private void ChkInUseBlink_Changed(object sender, RoutedEventArgs e)
         {
-            Settings.Default.luxSettings.Colors.BlinkMicInUse = (bool)chkInUseBlink.IsChecked;
+            Settings.Default.Lights.Colors.BlinkMicInUse = (bool)chkInUseBlink.IsChecked;
             ApplySettings();
         }
 
