@@ -358,9 +358,9 @@ namespace LuxOnAir
         /// Check notification icons for a microphone in use icon and react accordingly
         /// </summary>
         /// <returns>Text names of all found notification icons</returns>
-        private string CheckNotificationIcons()
+        private List<string> CheckNotificationIcons()
         {
-            string iconNames = "";
+            List<string> iconNames = new List<string>();
             
             // Query text labels of all notification icons
             foreach (AutomationElement icon in ShellEvents.EnumNotificationIcons())
@@ -370,7 +370,7 @@ namespace LuxOnAir
                 // Append to list if not blank
                 if (name != "")
                 {
-                    iconNames += name + '\n';
+                    iconNames.Add(name);
                 }
             }
 
@@ -379,7 +379,7 @@ namespace LuxOnAir
                 Settings.Default.Lights.SetLocked();
             }
             // Check if any of the in use strings are currently being displayed by a notification icon
-            else if (InUseText.Any(s => iconNames.Contains(s + "\n")))
+            else if (InUseText.Any(s => string.Join("\n", iconNames).Contains(s + "\n")))
             {
                 // Trigger mic in use lights
                 Settings.Default.Lights.SetInUse();
@@ -395,7 +395,7 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Write a message to thr debug log control
+        /// Write a message to the debug log control
         /// </summary>
         /// <param name="Msg">Message to write to the log</param>
         /// <param name="NoNewLine">Whether to add a new line at the end of the message</param>
@@ -524,7 +524,8 @@ namespace LuxOnAir
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
-            WriteToDebug("Found tray icons:\n" + CheckNotificationIcons());
+            List<string> iconTips = CheckNotificationIcons();
+            WriteToDebug(string.Format("Found {0} tray icon{1}:\n{2}", iconTips.Count, iconTips.Count == 1 ? "" : "s", string.Join("\n•\n", iconTips)));
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
@@ -558,5 +559,33 @@ namespace LuxOnAir
             e.Handled = true;
         }
 
+        private void btnTestInUse_Click(object sender, RoutedEventArgs e)
+        {
+            WriteToDebug("Testing 'In Use' color.");
+            Settings.Default.Lights.SetInUse();
+        }
+
+        private void btnTestNotInUse_Click(object sender, RoutedEventArgs e)
+        {
+            WriteToDebug("Testing 'Not In Use' color.");
+            Settings.Default.Lights.SetNotInUse();
+        }
+
+        private void btnTestLocked_Click(object sender, RoutedEventArgs e)
+        {
+            WriteToDebug("Testing 'Console Locked' color.");
+            Settings.Default.Lights.SetLocked();
+        }
+
+        private void btnTestReset_Click(object sender, RoutedEventArgs e)
+        {
+            WriteToDebug("Resetting to normal status color.");
+            CheckNotificationIcons();
+        }
+
+        private void TabItem_LostFocus(object sender, RoutedEventArgs e)
+        {
+            CheckNotificationIcons();
+        }
     }
 }
