@@ -9,7 +9,7 @@ namespace LuxOnAir
     /// <summary>
     /// Luxafor user settings
     /// </summary>
-    internal class LFRSettings : LightSettings
+    public class LFRSettings : LightSettings
     {
         [NonSerialized]
         private IDeviceList devices;

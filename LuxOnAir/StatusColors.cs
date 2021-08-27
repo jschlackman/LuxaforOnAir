@@ -3,7 +3,7 @@
     /// <summary>
     /// User color settings for defined statuses
     /// </summary>
-    internal class StatusColors
+    public class StatusColors
     {
         /// <summary>
         /// Color to use when microphone is in use
