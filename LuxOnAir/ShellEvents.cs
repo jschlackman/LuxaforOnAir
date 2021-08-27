@@ -3,7 +3,7 @@ using System.Windows.Automation;
 
 namespace LuxOnAir
 {
-    public static class ShellEvents
+    internal static class ShellEvents
     {
         /// <summary>
         /// Automation object for Shell_TrayWnd
@@ -26,8 +26,7 @@ namespace LuxOnAir
                 {
                     yield return button;
                 }
-                foreach (AutomationElement button in userArea.GetTopLevelElement().Find(
-                              "System Promoted Notification Area").EnumChildButtons())
+                foreach (AutomationElement button in userArea.GetTopLevelElement().Find("System Promoted Notification Area").EnumChildButtons())
                 {
                     yield return button;
                 }
@@ -37,8 +36,7 @@ namespace LuxOnAir
         /// <summary>
         /// Event handler object for subscribing to changes to the notification icons
         /// </summary>
-        static StructureChangedEventHandler trayEventHandler;
-
+        private static StructureChangedEventHandler trayEventHandler;
 
         /// <summary>
         /// Dispose of references and hooks to the shell tray

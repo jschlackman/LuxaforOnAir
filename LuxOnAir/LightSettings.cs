@@ -3,7 +3,7 @@
 namespace LuxOnAir
 {
     [SettingsSerializeAs(SettingsSerializeAs.Xml)]
-    public abstract class LightSettings
+    internal abstract class LightSettings
     {
         /// <summary>
         /// User-configured RGB light colors

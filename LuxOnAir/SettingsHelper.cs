@@ -2,7 +2,7 @@
 
 namespace LuxOnAir
 {
-    static class SettingsHelper
+    internal static class SettingsHelper
     {
         /// <summary>
         /// Windows autorun registry key path
