@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using LuxOnAir.Properties;
 using System.Management;
 using System.Windows.Media;
+using System.Threading;
+using System.Windows.Interop;
 
 namespace LuxOnAir
 {
@@ -51,65 +53,115 @@ namespace LuxOnAir
         /// </summary>
         private static bool bConsoleLocked = false;
 
+        /// <summary>
+        /// Stores the window's state prior to being minimized to the notification area
+        /// </summary>
+        private WindowState storedWindowState = WindowState.Normal;
+
+        /// <summary>
+        /// Mutex used to check whether another instance of this app is already running.
+        /// </summary>
+        private static readonly Mutex mutex = new Mutex(true, "{FEB97F90-3F85-429F-9F59-526F29856FC0}");
+
+        /// <summary>
+        /// Whether to hide the settings UI on startup
+        /// </summary>
+        private static bool HideOnStart = true;
+
         public MainWindow()
         {
-            
-            InitializeComponent();
-            
-            lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
-            lblAbout.Content = SettingsHelper.About;
-
-            ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
-            SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
-
-            InitNotifyIcon();
-
-            // Try to load settings, init defaults and show UI if no previous settings found
-            if (!SettingsHelper.LoadSettings())
+            // Check no other instance is already running
+            if (mutex.WaitOne(TimeSpan.Zero, true))
             {
-                WriteToDebug("No previous settings found, loading defaults and showing UI for first run.");
+
+                InitializeComponent();
+
+                lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
+                lblAbout.Content = SettingsHelper.About;
+
+                ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
+                SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
+
+                InitNotifyIcon();
+
+                // Try to load settings, init defaults and show UI if no previous settings found
+                if (!SettingsHelper.LoadSettings())
+                {
+                    WriteToDebug("No previous settings found, loading defaults and showing UI for first run.");
+                    HideOnStart = false;
+                }
+
+                InUseText = WindowsStrings.GetMicUseStrings();
+
+                // Initialize devices
+                Settings.Default.Lights.InitHardware();
+                WriteToDebug(Settings.Default.Lights.ConnectedDeviceDesc());
+
+                // Update the device status UI
+                UpdateDeviceStatus();
+
+                btnMicInUse.Background = Settings.Default.Lights.Colors.MicInUse.ToBrush();
+                btnMicNotInUse.Background = Settings.Default.Lights.Colors.MicNotInUse.ToBrush();
+                btnLocked.Background = Settings.Default.Lights.Colors.SessionLocked.ToBrush();
+
+                chkInUseBlink.IsChecked = Settings.Default.Lights.Colors.BlinkMicInUse;
+
+                // Check if program is correctly set to run at logon
+                chkStartAtLogon.IsChecked = GetRunAtLogon();
+
+                // Watch for hardware changes
+                hardwareWatcher = new ManagementEventWatcher
+                {
+                    Query = new WqlEventQuery("SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' GROUP WITHIN " + Settings.Default.Lights.InitSeconds.ToString())
+                };
+                hardwareWatcher.EventArrived += USBDevices_Changed;
+                hardwareWatcher.Start();
+
+                // Watch for power changes
+                powerWatcher = new ManagementEventWatcher
+                {
+                    Query = new WqlEventQuery("SELECT * FROM Win32_PowerManagementEvent")
+                };
+                powerWatcher.EventArrived += PowerEvent_Arrive;
+                powerWatcher.Start();
+
+                // Run the first icon check now
+                CheckNotificationIcons();
+
+            }
+            else
+            {
+                // Another instance is already running
                 
-                // Always show the UI on first run
-                Visibility = Visibility.Visible;
+                // Message the other instance to show the settings window
+                MessageHelper.PostMessage((IntPtr)MessageHelper.HWND_BROADCAST, MessageHelper.WM_SHOWME, IntPtr.Zero, IntPtr.Zero);
+
+                ReallyExit = true;
+                Close();
             }
 
-            InUseText = WindowsStrings.GetMicUseStrings();
+        }
 
-            // Initialize devices
-            Settings.Default.Lights.InitHardware();
-            WriteToDebug(Settings.Default.Lights.ConnectedDeviceDesc());
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            // Listen for windows messages
+            HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+            source.AddHook(WndProc);
 
-            // Update the device status UI
-            UpdateDeviceStatus();
+            // Now that the window has fully initialized, hide it if we aren't showing the settings screen immediately.
+            if (HideOnStart) { WindowState = WindowState.Minimized; }
+        }
 
-            btnMicInUse.Background = Settings.Default.Lights.Colors.MicInUse.ToBrush();
-            btnMicNotInUse.Background = Settings.Default.Lights.Colors.MicNotInUse.ToBrush();
-            btnLocked.Background = Settings.Default.Lights.Colors.SessionLocked.ToBrush();
-
-            chkInUseBlink.IsChecked = Settings.Default.Lights.Colors.BlinkMicInUse;
-
-            // Check if program is correctly set to run at logon
-            chkStartAtLogon.IsChecked = GetRunAtLogon();
-
-            // Watch for hardware changes
-            hardwareWatcher = new ManagementEventWatcher
+        // Handle incoming windows messages
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == MessageHelper.WM_SHOWME)
             {
-                Query = new WqlEventQuery("SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' GROUP WITHIN " + Settings.Default.Lights.InitSeconds.ToString())
-            };
-            hardwareWatcher.EventArrived += USBDevices_Changed;
-            hardwareWatcher.Start();
+                ShowSettingsWindow();
+                handled = true;
+            }
 
-            // Watch for power changes
-            powerWatcher = new ManagementEventWatcher
-            {
-                Query = new WqlEventQuery("SELECT * FROM Win32_PowerManagementEvent")
-            };
-            powerWatcher.EventArrived += PowerEvent_Arrive;
-            powerWatcher.Start();
-
-            // Run the first icon check now
-            CheckNotificationIcons();
-
+            return IntPtr.Zero;
         }
 
         /// <summary>
@@ -118,7 +170,7 @@ namespace LuxOnAir
         private bool GetRunAtLogon()
         {
             // Check if registry value exists and has the correct value for the current app path
-            return Registry.CurrentUser.OpenSubKey(SettingsHelper.RegWindowsRunKey).GetValue(SettingsHelper.RegProgramValue, "").ToString() == string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath);
+            return Registry.CurrentUser.OpenSubKey(SettingsHelper.RegWindowsRunKey).GetValue(SettingsHelper.ProgramValueID, "").ToString() == string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath);
         }
 
         /// <summary>
@@ -134,16 +186,16 @@ namespace LuxOnAir
                 // If not already set to run at logon, set the correct registry key now
                 if (!GetRunAtLogon())
                 {
-                    windowsRun.SetValue(SettingsHelper.RegProgramValue, string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
+                    windowsRun.SetValue(SettingsHelper.ProgramValueID, string.Format("\"{0}\"", System.Windows.Forms.Application.ExecutablePath));
                     WriteToDebug(string.Format("Added registry key at {0} to run app at startup.", windowsRun.Name));
                 }
             }
             else
             {
                 // Check for the presence of the startup registry value and remove it
-                if (windowsRun.GetValue(SettingsHelper.RegProgramValue) != null)
+                if (windowsRun.GetValue(SettingsHelper.ProgramValueID) != null)
                 {
-                    windowsRun.DeleteValue(SettingsHelper.RegProgramValue);
+                    windowsRun.DeleteValue(SettingsHelper.ProgramValueID);
                     WriteToDebug(string.Format("Removed registry key from {0}, app will no longer run at startup.", windowsRun.Name));
                 }
             }
@@ -377,8 +429,23 @@ namespace LuxOnAir
 
         private void SettingsMenuItem_Click(object sender, EventArgs e)
         {
+            ShowSettingsWindow();
+        }
+
+        /// <summary>
+        /// Show the settings window with the same state (maximized or not) as before it was hidden.
+        /// </summary>
+        private void ShowSettingsWindow()
+        {
             Show();
             WindowState = storedWindowState;
+
+            // Store the current Topmost value (usually false)
+            bool top = this.Topmost;
+            // Make settings jump to the top of everything
+            this.Topmost = true;
+            // Set it back to whatever it was before
+            this.Topmost = top;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -405,6 +472,9 @@ namespace LuxOnAir
             hardwareWatcher.Dispose();
             powerWatcher.Stop();
             powerWatcher.Dispose();
+
+            // Release the single-instance mutex
+            mutex.ReleaseMutex();
         }
 
         private void BtnMicInUse_Click(object sender, RoutedEventArgs e)
@@ -457,11 +527,6 @@ namespace LuxOnAir
             WriteToDebug("Found tray icons:\n" + CheckNotificationIcons());
         }
 
-        /// <summary>
-        /// Stores the windows state prior to being minimized to the notification area
-        /// </summary>
-        private WindowState storedWindowState = WindowState.Normal;
-
         private void Window_StateChanged(object sender, EventArgs e)
         {
             if (WindowState == WindowState.Minimized)
@@ -492,5 +557,6 @@ namespace LuxOnAir
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }
+
     }
 }

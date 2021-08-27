@@ -10,9 +10,9 @@ namespace LuxOnAir
         public const string RegWindowsRunKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
 
         /// <summary>
-        /// Program-specific autorun value name
+        /// Program-specific name for autorun value and message broadcast
         /// </summary>
-        public const string RegProgramValue = "LuxOnAir";
+        public const string ProgramValueID = "LuxOnAir";
 
         /// <summary>
         /// About text for this app

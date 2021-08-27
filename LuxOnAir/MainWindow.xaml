@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LuxOnAir"
         mc:Ignorable="d"
-        Title="Luxafor On Air Settings" Height="285" Width="600" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="600" MinHeight="285" Visibility="Hidden">
+        Title="Luxafor On Air Settings" Height="285" Width="600" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="600" MinHeight="285" SourceInitialized="Window_SourceInitialized" >
     <Grid Margin="0,0,0,0">
         <Rectangle Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" Margin="0,0,0,0" Height="38" VerticalAlignment="Bottom"/>
 
