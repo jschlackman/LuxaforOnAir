@@ -76,6 +76,8 @@ namespace LuxOnAir
 
                 InitializeComponent();
 
+                InUseText = WindowsStrings.GetMicUseStrings();
+
                 lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
                 lblAbout.Content = SettingsHelper.About;
 
@@ -90,8 +92,6 @@ namespace LuxOnAir
                     WriteToDebug("No previous settings found, loading defaults and showing UI for first run.");
                     HideOnStart = false;
                 }
-
-                InUseText = WindowsStrings.GetMicUseStrings();
 
                 // Initialize devices
                 Settings.Default.Lights.InitHardware();
