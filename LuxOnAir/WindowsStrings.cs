@@ -64,6 +64,42 @@ namespace LuxOnAir
             return moduleStrings;
         }
 
+        public static string SystemPromotedNotificationArea()
+        {
+            // Get a new handle to the external library containing strings used for the mic in use notification
+            IntPtr libraryHandle = LoadLibrary("explorer.exe");
+
+            string moduleString = "System Promoted Notification Area";
+
+            if (libraryHandle != IntPtr.Zero)
+            {
+                moduleString = Load(libraryHandle, 590, moduleString);
+
+                // Free handle to external library
+                FreeLibrary("explorer.exe");
+            }
+
+            return moduleString;
+        }
+
+        public static string UserPromotedNotificationArea()
+        {
+            // Get a new handle to the external library containing strings used for the mic in use notification
+            IntPtr libraryHandle = LoadLibrary("explorer.exe");
+
+            string moduleString = "User Promoted Notification Area";
+
+            if (libraryHandle != IntPtr.Zero)
+            {
+                moduleString = Load(libraryHandle, 593, moduleString);
+
+                // Free handle to external library
+                FreeLibrary("explorer.exe");
+            }
+
+            return moduleString;
+        }
+
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 

@@ -26,7 +26,7 @@ namespace LuxOnAir
                 {
                     yield return button;
                 }
-                foreach (AutomationElement button in userArea.GetTopLevelElement().Find("System Promoted Notification Area").EnumChildButtons())
+                foreach (AutomationElement button in userArea.GetTopLevelElement().Find(WindowsStrings.SystemPromotedNotificationArea()).EnumChildButtons())
                 {
                     yield return button;
                 }
@@ -54,7 +54,7 @@ namespace LuxOnAir
         /// </summary>
         public static void InitTrayHooks(StructureChangedEventHandler eventHandler)
         {
-            userArea = AutomationElement.RootElement.Find("User Promoted Notification Area");
+            userArea = AutomationElement.RootElement.Find(WindowsStrings.UserPromotedNotificationArea());
             shellTray = userArea.GetTopLevelElement();
 
             Automation.AddStructureChangedEventHandler(shellTray, TreeScope.Descendants, trayEventHandler = eventHandler);
