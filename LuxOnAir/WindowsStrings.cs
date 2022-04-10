@@ -53,8 +53,8 @@ namespace LuxOnAir
             {
                 // Load each known string resource (using en-US defaults if not found)
                 moduleStrings.Add(Load(libraryHandle, 2045, "Your microphone is currently in use"));
-                moduleStrings.Add(Load(libraryHandle, 2046, "%1 is using your microphone").Remove(0, 3));
-                moduleStrings.Add(Load(libraryHandle, 2047, "%1 apps are using your microphone").Remove(0, 3));
+                moduleStrings.Add(Load(libraryHandle, 2046, "%1 is using your microphone").Replace("%1","").Trim());
+                moduleStrings.Add(Load(libraryHandle, 2047, "%1 apps are using your microphone").Replace("%1", "").Trim());
                 moduleStrings.Add(Load(libraryHandle, 2052, "1 app is using your microphone"));
 
                 // Free handle to external library

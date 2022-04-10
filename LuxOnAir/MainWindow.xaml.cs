@@ -379,7 +379,7 @@ namespace LuxOnAir
                 Settings.Default.Lights.SetLocked();
             }
             // Check if any of the in use strings are currently being displayed by a notification icon
-            else if (InUseText.Any(s => string.Join("\n", iconNames).Contains(s + "\n")))
+            else if (InUseText.Any(s => string.Join("\n", iconNames).Contains(s)))
             {
                 // Trigger mic in use lights
                 Settings.Default.Lights.SetInUse();
