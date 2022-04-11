@@ -41,10 +41,10 @@
                     <TextBlock x:Name="textBlock3" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Debug log:" VerticalAlignment="Top"/>
                     <Button x:Name="btnTest" Content="Check Mic" Margin="10,0,0,10" ToolTip="Check for microphone usage now and log results" Click="BtnTest_Click" HorizontalAlignment="Left" Width="75" Height="19" VerticalAlignment="Bottom"/>
                     <Label x:Name="label2" Content="Color Tests:" HorizontalAlignment="Right" Margin="0,0,330,7" VerticalAlignment="Bottom"/>
-                    <Button x:Name="btnTestInUse" Content="In Use" HorizontalAlignment="Right" Margin="0,0,250,10" VerticalAlignment="Bottom" Width="75" Click="btnTestInUse_Click" ToolTip="Test the 'Microphone In Use' color"/>
-                    <Button x:Name="btnTestNotInUse" Content="Not In Use" HorizontalAlignment="Right" Margin="0,0,170,10" Width="75" Click="btnTestNotInUse_Click" ToolTip="Test the 'Microphone Not In Use' color" VerticalAlignment="Bottom"/>
-                    <Button x:Name="btnTestLocked" Content="Locked" HorizontalAlignment="Right" Margin="0,0,90,10" Width="75" Click="btnTestLocked_Click" ToolTip="Test the 'Console Locked' color" VerticalAlignment="Bottom"/>
-                    <Button x:Name="btnTestReset" Content="Reset" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Click="btnTestReset_Click" ToolTip="Return to normal status color."/>
+                    <Button x:Name="btnTestInUse" Content="In Use" HorizontalAlignment="Right" Margin="0,0,250,10" VerticalAlignment="Bottom" Width="75" Click="BtnTestInUse_Click" ToolTip="Test the 'Microphone In Use' color"/>
+                    <Button x:Name="btnTestNotInUse" Content="Not In Use" HorizontalAlignment="Right" Margin="0,0,170,10" Width="75" Click="BtnTestNotInUse_Click" ToolTip="Test the 'Microphone Not In Use' color" VerticalAlignment="Bottom"/>
+                    <Button x:Name="btnTestLocked" Content="Locked" HorizontalAlignment="Right" Margin="0,0,90,10" Width="75" Click="BtnTestLocked_Click" ToolTip="Test the 'Console Locked' color" VerticalAlignment="Bottom"/>
+                    <Button x:Name="btnTestReset" Content="Reset" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Click="BtnTestReset_Click" ToolTip="Return to normal status color."/>
                 </Grid>
             </TabItem>
         </TabControl>
