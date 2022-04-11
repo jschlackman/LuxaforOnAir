@@ -42,7 +42,12 @@ namespace LuxOnAir
         /// Watches for system hardware changes (e.g. USB connect/disconnect)
         /// </summary>
         private static ManagementEventWatcher hardwareWatcher;
-        
+
+        /// <summary>
+        /// Watches for registry changes (mic in use)
+        /// </summary>
+        private static ManagementEventWatcher regWatcher;
+
         /// <summary>
         /// Watches for system power events (e.g. suspend/resume)
         /// </summary>
@@ -81,7 +86,7 @@ namespace LuxOnAir
                 lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
                 lblAbout.Content = SettingsHelper.About;
 
-                ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
+                //ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
                 SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
 
                 InitNotifyIcon();
@@ -109,6 +114,17 @@ namespace LuxOnAir
                 // Check if program is correctly set to run at logon
                 chkStartAtLogon.IsChecked = GetRunAtLogon();
 
+                // Get current user SID so we can monitor the correct key in the USERS registry hive
+                string sid = System.Security.Principal.WindowsIdentity.GetCurrent().User.Value;
+
+                // Watch for registry changes
+                regWatcher = new ManagementEventWatcher
+                {
+                    Query = new WqlEventQuery(String.Format("SELECT * FROM RegistryTreeChangeEvent WHERE Hive='HKEY_USERS' AND RootPath='{0}\\\\{1}'", sid, MicrophoneHelper.MicCapabilityKey.Replace("\\", "\\\\")))
+                };
+                regWatcher.EventArrived += RegWatcher_EventArrived;
+                regWatcher.Start();
+
                 // Watch for hardware changes
                 hardwareWatcher = new ManagementEventWatcher
                 {
@@ -125,8 +141,8 @@ namespace LuxOnAir
                 powerWatcher.EventArrived += PowerEvent_Arrive;
                 powerWatcher.Start();
 
-                // Run the first icon check now
-                CheckNotificationIcons();
+                // Run the first mic check now
+                CheckMicUsage();
 
             }
             else
@@ -140,6 +156,14 @@ namespace LuxOnAir
                 Close();
             }
 
+        }
+
+        /// <summary>
+        /// Handles registry change events. Check for mic usage whenever a change is detected.
+        /// </summary>
+        private void RegWatcher_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            CheckMicUsage();
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -212,8 +236,8 @@ namespace LuxOnAir
 
             // Update the device status UI
             UpdateDeviceStatus();
-            // Run an icon check now
-            CheckNotificationIcons();
+            // Run a mic check now
+            CheckMicUsage();
         }
 
         /// <summary>
@@ -266,7 +290,7 @@ namespace LuxOnAir
                         WriteToDebug("System resuming from Suspend, turning lights back on.");
                         Dispatcher.Invoke(() =>
                         {
-                            CheckNotificationIcons();
+                            CheckMicUsage();
                         });
                     }
                 }
@@ -284,7 +308,7 @@ namespace LuxOnAir
                 case SessionSwitchReason.ConsoleConnect:
                     WriteToDebug("Console session unlocked. Setting to standard color.");
                     bConsoleLocked = false;
-                    CheckNotificationIcons();
+                    CheckMicUsage();
                     break;
                 default:
                     WriteToDebug("Console session locked. Setting to Locked color.");
@@ -303,7 +327,7 @@ namespace LuxOnAir
             // If an element was added or removed from the UI structure, check the notification icons
             if ((e.StructureChangeType == StructureChangeType.ChildAdded) || (e.StructureChangeType == StructureChangeType.ChildRemoved))
             {
-                CheckNotificationIcons();
+                CheckMicUsage();
             }
         }
 
@@ -355,31 +379,19 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Check notification icons for a microphone in use icon and react accordingly
+        /// Check if the microphone is in use and react accordingly
         /// </summary>
-        /// <returns>Text names of all found notification icons</returns>
-        private List<string> CheckNotificationIcons()
+        /// <returns>Text names of all applications using the microphone</returns>
+        private List<string> CheckMicUsage()
         {
-            List<string> iconNames = new List<string>();
-            
-            // Query text labels of all notification icons
-            foreach (AutomationElement icon in ShellEvents.EnumNotificationIcons())
-            {
-                string name = icon.GetCurrentPropertyValue(AutomationElement.NameProperty) as string;
-
-                // Append to list if not blank
-                if (name != "")
-                {
-                    iconNames.Add(name);
-                }
-            }
+            List<string> micUsers = MicrophoneHelper.GetMicUsers();
 
             if (bConsoleLocked)
             {
                 Settings.Default.Lights.SetLocked();
             }
-            // Check if any of the in use strings are currently being displayed by a notification icon
-            else if (InUseText.Any(s => string.Join("\n", iconNames).Contains(s)))
+            // Check if any applications were found using the mic
+            else if (micUsers.Count > 0)
             {
                 // Trigger mic in use lights
                 Settings.Default.Lights.SetInUse();
@@ -390,7 +402,7 @@ namespace LuxOnAir
                 Settings.Default.Lights.SetNotInUse();
             }
 
-            return iconNames;
+            return micUsers;
 
         }
 
@@ -412,7 +424,7 @@ namespace LuxOnAir
         private void ApplySettings()
         {
             Settings.Default.Save();
-            CheckNotificationIcons();
+            CheckMicUsage();
         }
 
         private void BtnDone_Click(object sender, RoutedEventArgs e)
@@ -468,6 +480,8 @@ namespace LuxOnAir
 
             notifyIcon.Dispose();
 
+            regWatcher.Stop();
+            regWatcher.Dispose();
             hardwareWatcher.Stop();
             hardwareWatcher.Dispose();
             powerWatcher.Stop();
@@ -524,8 +538,16 @@ namespace LuxOnAir
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
-            List<string> iconTips = CheckNotificationIcons();
-            WriteToDebug(string.Format("Found {0} tray icon{1}:\n{2}", iconTips.Count, iconTips.Count == 1 ? "" : "s", string.Join("\n•\n", iconTips)));
+            List<string> micUsers = CheckMicUsage();
+
+            if (micUsers.Count > 0)
+            {
+                WriteToDebug(string.Format("Mic is in use by {0} app{1}:\n{2}", micUsers.Count, micUsers.Count == 1 ? "" : "s", string.Join("\n", micUsers)));
+            }
+            else
+            {
+                WriteToDebug("Mic is not currently in use.");
+            }
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
@@ -580,12 +602,12 @@ namespace LuxOnAir
         private void btnTestReset_Click(object sender, RoutedEventArgs e)
         {
             WriteToDebug("Resetting to normal status color.");
-            CheckNotificationIcons();
+            CheckMicUsage();
         }
 
         private void TabItem_LostFocus(object sender, RoutedEventArgs e)
         {
-            CheckNotificationIcons();
+            CheckMicUsage();
         }
     }
 }

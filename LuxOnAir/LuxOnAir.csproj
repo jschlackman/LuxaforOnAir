@@ -78,6 +78,7 @@
     <Compile Include="LFRSettings.cs" />
     <Compile Include="LightSettings.cs" />
     <Compile Include="MessageHelper.cs" />
+    <Compile Include="MicrophoneHelper.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsHelper.cs" />
     <Compile Include="ShellEvents.cs" />

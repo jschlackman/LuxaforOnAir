@@ -39,7 +39,7 @@
                 <Grid Background="#FFE5E5E5">
                     <TextBox x:Name="txtDebugLog" Margin="10,31,10.4,33.8" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" FontFamily="Consolas" FontSize="11" Background="#FF2C2C2C" Foreground="White" />
                     <TextBlock x:Name="textBlock3" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Debug log:" VerticalAlignment="Top"/>
-                    <Button x:Name="btnTest" Content="Test Icons" Margin="10,0,0,10" ToolTip="Check notifications icons now and log results" Click="BtnTest_Click" HorizontalAlignment="Left" Width="75" Height="19" VerticalAlignment="Bottom"/>
+                    <Button x:Name="btnTest" Content="Check Mic" Margin="10,0,0,10" ToolTip="Check for microphone usage now and log results" Click="BtnTest_Click" HorizontalAlignment="Left" Width="75" Height="19" VerticalAlignment="Bottom"/>
                     <Label x:Name="label2" Content="Color Tests:" HorizontalAlignment="Right" Margin="0,0,330,7" VerticalAlignment="Bottom"/>
                     <Button x:Name="btnTestInUse" Content="In Use" HorizontalAlignment="Right" Margin="0,0,250,10" VerticalAlignment="Bottom" Width="75" Click="btnTestInUse_Click" ToolTip="Test the 'Microphone In Use' color"/>
                     <Button x:Name="btnTestNotInUse" Content="Not In Use" HorizontalAlignment="Right" Margin="0,0,170,10" Width="75" Click="btnTestNotInUse_Click" ToolTip="Test the 'Microphone Not In Use' color" VerticalAlignment="Bottom"/>
