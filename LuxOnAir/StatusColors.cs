@@ -34,6 +34,5 @@
 
             BlinkMicInUse = false;
         }
-
     }
 }

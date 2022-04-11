@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
-using System.Windows.Automation;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using LuxOnAir.Properties;
@@ -22,11 +20,6 @@ namespace LuxOnAir
         /// Indicate if the application should fully exit when closing a window.
         /// </summary>
         private bool ReallyExit = false;
-
-        /// <summary>
-        /// String values used by notification icons that indicate the microphone is in use.
-        /// </summary>
-        private readonly List<string> InUseText;
 
         /// <summary>
         /// Notification icon for this application
@@ -81,12 +74,9 @@ namespace LuxOnAir
 
                 InitializeComponent();
 
-                InUseText = WindowsStrings.GetMicUseStrings();
-
                 lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
                 lblAbout.Content = SettingsHelper.About;
 
-                //ShellEvents.InitTrayHooks(new StructureChangedEventHandler(OnStructureChanged));
                 SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
 
                 InitNotifyIcon();
@@ -120,7 +110,7 @@ namespace LuxOnAir
                 // Watch for registry changes
                 regWatcher = new ManagementEventWatcher
                 {
-                    Query = new WqlEventQuery(String.Format("SELECT * FROM RegistryTreeChangeEvent WHERE Hive='HKEY_USERS' AND RootPath='{0}\\\\{1}'", sid, MicrophoneHelper.MicCapabilityKey.Replace("\\", "\\\\")))
+                    Query = new WqlEventQuery(string.Format("SELECT * FROM RegistryTreeChangeEvent WHERE Hive='HKEY_USERS' AND RootPath='{0}\\\\{1}'", sid, MicrophoneHelper.MicCapabilityKey.Replace("\\", "\\\\")))
                 };
                 regWatcher.EventArrived += RegWatcher_EventArrived;
                 regWatcher.Start();
@@ -319,19 +309,6 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Handles structure-changed events. If a new element has been added or removed, makes
-        /// sure that notification icons are re-checked for mic use
-        /// </summary>
-        private void OnStructureChanged(object sender, StructureChangedEventArgs e)
-        {
-            // If an element was added or removed from the UI structure, check the notification icons
-            if ((e.StructureChangeType == StructureChangeType.ChildAdded) || (e.StructureChangeType == StructureChangeType.ChildRemoved))
-            {
-                CheckMicUsage();
-            }
-        }
-
-        /// <summary>
         /// Initialize the notification icon for this application
         /// </summary>
         private void InitNotifyIcon()
@@ -475,7 +452,6 @@ namespace LuxOnAir
         private void Window_Closed(object sender, EventArgs e)
         {
             Settings.Default.Lights.ShutdownHardware();
-            ShellEvents.DisposeTrayHooks();
             SystemEvents.SessionSwitch -= SessionSwitchHandler;
 
             notifyIcon.Dispose();
@@ -581,25 +557,25 @@ namespace LuxOnAir
             e.Handled = true;
         }
 
-        private void btnTestInUse_Click(object sender, RoutedEventArgs e)
+        private void BtnTestInUse_Click(object sender, RoutedEventArgs e)
         {
             WriteToDebug("Testing 'In Use' color.");
             Settings.Default.Lights.SetInUse();
         }
 
-        private void btnTestNotInUse_Click(object sender, RoutedEventArgs e)
+        private void BtnTestNotInUse_Click(object sender, RoutedEventArgs e)
         {
             WriteToDebug("Testing 'Not In Use' color.");
             Settings.Default.Lights.SetNotInUse();
         }
 
-        private void btnTestLocked_Click(object sender, RoutedEventArgs e)
+        private void BtnTestLocked_Click(object sender, RoutedEventArgs e)
         {
             WriteToDebug("Testing 'Console Locked' color.");
             Settings.Default.Lights.SetLocked();
         }
 
-        private void btnTestReset_Click(object sender, RoutedEventArgs e)
+        private void BtnTestReset_Click(object sender, RoutedEventArgs e)
         {
             WriteToDebug("Resetting to normal status color.");
             CheckMicUsage();
