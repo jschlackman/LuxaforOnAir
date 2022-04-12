@@ -80,13 +80,7 @@ namespace LuxOnAir
                 SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
 
                 InitNotifyIcon();
-
-                // Try to load settings, init defaults and show UI if no previous settings found
-                if (!SettingsHelper.LoadSettings())
-                {
-                    WriteToDebug("No previous settings found, loading defaults and showing UI for first run.");
-                    HideOnStart = false;
-                }
+                LoadSettings();
 
                 // Initialize devices
                 Settings.Default.Lights.InitHardware();
@@ -94,12 +88,6 @@ namespace LuxOnAir
 
                 // Update the device status UI
                 UpdateDeviceStatus();
-
-                btnMicInUse.Background = Settings.Default.Lights.Colors.MicInUse.ToBrush();
-                btnMicNotInUse.Background = Settings.Default.Lights.Colors.MicNotInUse.ToBrush();
-                btnLocked.Background = Settings.Default.Lights.Colors.SessionLocked.ToBrush();
-
-                chkInUseBlink.IsChecked = Settings.Default.Lights.Colors.BlinkMicInUse;
 
                 // Check if program is correctly set to run at logon
                 chkStartAtLogon.IsChecked = GetRunAtLogon();
@@ -145,7 +133,35 @@ namespace LuxOnAir
                 ReallyExit = true;
                 Close();
             }
+        }
 
+        /// <summary>
+        /// Load saved settings and reflect them in the UI
+        /// </summary>
+        private void LoadSettings()
+        {
+            // Try to load settings, init defaults and show UI if no previous settings found
+            if (!SettingsHelper.LoadSettings())
+            {
+                WriteToDebug("No previous settings found, loading defaults and showing UI for first run.");
+                HideOnStart = false;
+            }
+
+            btnMicInUse.Background = Settings.Default.Lights.Colors.MicInUse.ToBrush();
+            btnMicNotInUse.Background = Settings.Default.Lights.Colors.MicNotInUse.ToBrush();
+            btnLocked.Background = Settings.Default.Lights.Colors.SessionLocked.ToBrush();
+
+            chkInUseBlink.IsChecked = Settings.Default.Lights.Colors.BlinkMicInUse;
+            chkInUseWave.IsChecked = Settings.Default.Lights.Colors.WaveMicInUse;
+        }
+
+        /// <summary>
+        /// Ensure currently configured settings are saved from the UI
+        /// </summary>
+        private void ApplySettings()
+        {
+            Settings.Default.Save();
+            CheckMicUsage();
         }
 
         /// <summary>
@@ -398,12 +414,6 @@ namespace LuxOnAir
             });
         }
 
-        private void ApplySettings()
-        {
-            Settings.Default.Save();
-            CheckMicUsage();
-        }
-
         private void BtnDone_Click(object sender, RoutedEventArgs e)
         {
             ApplySettings();
@@ -542,8 +552,19 @@ namespace LuxOnAir
         private void ChkInUseBlink_Changed(object sender, RoutedEventArgs e)
         {
             Settings.Default.Lights.Colors.BlinkMicInUse = (bool)chkInUseBlink.IsChecked;
+            // If using blink, turn off wave
+            if (Settings.Default.Lights.Colors.BlinkMicInUse) { chkInUseWave.IsChecked = false; }
             ApplySettings();
         }
+
+        private void ChkInUseWave_Changed(object sender, RoutedEventArgs e)
+        {
+            Settings.Default.Lights.Colors.WaveMicInUse = (bool)chkInUseWave.IsChecked;
+            // If using wave, turn off blink
+            if (Settings.Default.Lights.Colors.WaveMicInUse) { chkInUseBlink.IsChecked = false; }
+            ApplySettings();
+        }
+
 
         private void ChkStartAtLogon_Changed(object sender, RoutedEventArgs e)
         {

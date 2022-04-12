@@ -22,8 +22,11 @@
         /// Sets the mic in use status to blink when active
         /// </summary>
         public bool BlinkMicInUse;
-        //public bool BlinkMicNotInUse;
-        //public bool BlinkSessionLocked;
+
+        /// <summary>
+        /// Sets the mic in use status to wave when active (on supported devices)
+        /// </summary>
+        public bool WaveMicInUse;
 
         public StatusColors()
         {
@@ -33,6 +36,7 @@
             SessionLocked = System.Drawing.Color.Yellow.ToArgb();
 
             BlinkMicInUse = false;
+            WaveMicInUse = true;
         }
     }
 }

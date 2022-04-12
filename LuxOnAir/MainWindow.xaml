@@ -15,6 +15,7 @@
                     <Button x:Name="btnMicNotInUse" Content="" HorizontalAlignment="Left" Margin="199,43,0,0" VerticalAlignment="Top" Width="75"  Click="BtnMicNotInUse_Click" ToolTip="Click to set the color displayed when the microphone is not in use" />
                     <Button x:Name="btnLocked" Content="" HorizontalAlignment="Left" Margin="199,67,0,0" VerticalAlignment="Top" Width="75" Click="BtnLocked_Click" ToolTip="Click to set the color displayed when the workstation console is locked (e.g. after pressing Win+L)"/>
                     <CheckBox x:Name="chkInUseBlink" Content="Blink" HorizontalAlignment="Left" Margin="279,22,0,0" VerticalAlignment="Top" Checked="ChkInUseBlink_Changed" Unchecked="ChkInUseBlink_Changed" ToolTip="Periodically blink the light when the microphone is in use"/>
+                    <CheckBox x:Name="chkInUseWave" Content="Wave" HorizontalAlignment="Left" Margin="334,22,0,0" VerticalAlignment="Top" Checked="ChkInUseWave_Changed" Unchecked="ChkInUseWave_Changed" ToolTip="Use a wave pattern on the light when the microphone is in use"/>
                     <Label x:Name="label" Content="Microphone In Use" HorizontalAlignment="Left" Margin="10,16,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="label1" Content="Color:" HorizontalAlignment="Left" Margin="157,16,0,0" VerticalAlignment="Top"/>
                     <Label x:Name="label_Copy" Content="Microphone Not In Use" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" FontWeight="Bold"/>

@@ -105,6 +105,22 @@ namespace LuxOnAir
         }
 
         /// <summary>
+        /// Wave all Luxafor lights with a specified color
+        /// </summary>
+        /// <param name="color">Color to set</param>
+        private void WaveAllLights(System.Drawing.Color color)
+        {
+            if (Available())
+            {
+                foreach (IDevice device in devices)
+                {
+                    // Wave the required color
+                    device.Wave(WaveType.Long, new LuxaforSharp.Color(color.R, color.G, color.B), 10, 0);
+                }
+            }
+        }
+
+        /// <summary>
         /// Blink lights with the current color
         /// </summary>
         private void BlinkAllLights()
@@ -150,8 +166,17 @@ namespace LuxOnAir
         public override void SetInUse()
         {
             currentColor = System.Drawing.Color.FromArgb(Colors.MicInUse);
-            SetAllLights(currentColor);
-            if (Colors.BlinkMicInUse) { BlinkAllLights(); }
+            if (Colors.WaveMicInUse)
+            {
+                WaveAllLights(currentColor);
+            }
+            else
+            {
+                SetAllLights(currentColor);
+                if (Colors.BlinkMicInUse) { BlinkAllLights(); }
+            }
+
+            
         }
 
         /// <summary>
