@@ -36,7 +36,7 @@
             SessionLocked = System.Drawing.Color.Yellow.ToArgb();
 
             BlinkMicInUse = false;
-            WaveMicInUse = true;
+            WaveMicInUse = false;
         }
     }
 }
