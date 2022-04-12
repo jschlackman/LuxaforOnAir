@@ -121,7 +121,6 @@ namespace LuxOnAir
 
                 // Run the first mic check now
                 CheckMicUsage();
-
             }
             else
             {
@@ -367,6 +366,7 @@ namespace LuxOnAir
                 Visible = true,
             };
 
+            // Set the double-click action to be the same as selecting Settings from the context menu
             notifyIcon.MouseDoubleClick += SettingsMenuItem_Click;
 
         }
@@ -461,11 +461,15 @@ namespace LuxOnAir
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            // Literally turn off the lights
             Settings.Default.Lights.ShutdownHardware();
+            
+            // Stop listening for console lock & unlock events
             SystemEvents.SessionSwitch -= SessionSwitchHandler;
 
             notifyIcon.Dispose();
 
+            // Stop and dispose of WMI event watchers
             regWatcher.Stop();
             regWatcher.Dispose();
             hardwareWatcher.Stop();
@@ -479,11 +483,13 @@ namespace LuxOnAir
 
         private void BtnMicInUse_Click(object sender, RoutedEventArgs e)
         {
+            // Show a color dialog with the current color for the user to change
             ColorDialog colorDialog = new ColorDialog()
             {
                 Color = System.Drawing.Color.FromArgb(Settings.Default.Lights.Colors.MicInUse)
             };
 
+            // If the user did not cancel, set the picked color as the new mic in use indicator color
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 Settings.Default.Lights.Colors.MicInUse = colorDialog.Color.ToArgb();
@@ -494,11 +500,13 @@ namespace LuxOnAir
 
         private void BtnMicNotInUse_Click(object sender, RoutedEventArgs e)
         {
+            // Show a color dialog with the current color for the user to change
             ColorDialog colorDialog = new ColorDialog()
             {
                 Color = System.Drawing.Color.FromArgb(Settings.Default.Lights.Colors.MicNotInUse)
             };
 
+            // If the user did not cancel, set the picked color as the new mic not in use indicator color
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 Settings.Default.Lights.Colors.MicNotInUse = colorDialog.Color.ToArgb();
@@ -509,11 +517,13 @@ namespace LuxOnAir
 
         private void BtnLocked_Click(object sender, RoutedEventArgs e)
         {
+            // Show a color dialog with the current color for the user to change
             ColorDialog colorDialog = new ColorDialog()
             {
                 Color = System.Drawing.Color.FromArgb(Settings.Default.Lights.Colors.SessionLocked)
             };
 
+            // If the user did not cancel, set the picked color as the new locked console indicator color
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 Settings.Default.Lights.Colors.SessionLocked = colorDialog.Color.ToArgb();
@@ -526,6 +536,7 @@ namespace LuxOnAir
         {
             List<string> micUsers = CheckMicUsage();
 
+            // Report mic usage to the debug log
             if (micUsers.Count > 0)
             {
                 WriteToDebug(string.Format("Mic is in use by {0} app{1}:\n{2}", micUsers.Count, micUsers.Count == 1 ? "" : "s", string.Join("\n", micUsers)));
@@ -540,13 +551,14 @@ namespace LuxOnAir
         {
             if (WindowState == WindowState.Minimized)
             {
+                // Hide on minimize
                 Hide();
             }
             else
             {
+                // When not minimized, make sure it restores to the previous state
                 storedWindowState = WindowState;
             }
-
         }
 
         private void ChkInUseBlink_Changed(object sender, RoutedEventArgs e)
@@ -574,6 +586,7 @@ namespace LuxOnAir
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
+            // Open the default browser to the requested website
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }

@@ -175,8 +175,6 @@ namespace LuxOnAir
                 SetAllLights(currentColor);
                 if (Colors.BlinkMicInUse) { BlinkAllLights(); }
             }
-
-            
         }
 
         /// <summary>
