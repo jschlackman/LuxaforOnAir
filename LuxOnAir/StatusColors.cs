@@ -14,10 +14,13 @@
         /// </summary>
         public int MicNotInUse;
         /// <summary>
+        /// Whether a different color should be set when the console is locked
+        /// </summary>
+        public bool ChangeOnLock;
+        /// <summary>
         /// Color to use when session is locked
         /// </summary>
         public int SessionLocked;
-
         /// <summary>
         /// Sets the mic in use status to blink when active
         /// </summary>
@@ -33,6 +36,8 @@
             // Set default colors
             MicInUse = System.Drawing.Color.Red.ToArgb();
             MicNotInUse = System.Drawing.Color.FromArgb(0, 190, 0).ToArgb();
+
+            ChangeOnLock = true;
             SessionLocked = System.Drawing.Color.Yellow.ToArgb();
 
             BlinkMicInUse = false;

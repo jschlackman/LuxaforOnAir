@@ -148,6 +148,8 @@ namespace LuxOnAir
 
             btnMicInUse.Background = Settings.Default.Lights.Colors.MicInUse.ToBrush();
             btnMicNotInUse.Background = Settings.Default.Lights.Colors.MicNotInUse.ToBrush();
+
+            radioLockedYes.IsChecked = Settings.Default.Lights.Colors.ChangeOnLock;
             btnLocked.Background = Settings.Default.Lights.Colors.SessionLocked.ToBrush();
 
             chkInUseBlink.IsChecked = Settings.Default.Lights.Colors.BlinkMicInUse;
@@ -307,19 +309,23 @@ namespace LuxOnAir
         /// </summary>
         public void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
         {
-            switch (e.Reason)
+            // Only react to console lock/unlock if set by user
+            if (Settings.Default.Lights.Colors.ChangeOnLock)
             {
-                case SessionSwitchReason.SessionUnlock:
-                case SessionSwitchReason.ConsoleConnect:
-                    WriteToDebug("Console session unlocked. Setting to standard color.");
-                    bConsoleLocked = false;
-                    CheckMicUsage();
-                    break;
-                default:
-                    WriteToDebug("Console session locked. Setting to Locked color.");
-                    bConsoleLocked = true;
-                    Settings.Default.Lights.SetLocked();
-                break;
+                switch (e.Reason)
+                {
+                    case SessionSwitchReason.SessionUnlock:
+                    case SessionSwitchReason.ConsoleConnect:
+                        WriteToDebug("Console session unlocked. Setting to standard color.");
+                        bConsoleLocked = false;
+                        CheckMicUsage();
+                        break;
+                    default:
+                        WriteToDebug("Console session locked. Setting to Locked color.");
+                        bConsoleLocked = true;
+                        Settings.Default.Lights.SetLocked();
+                        break;
+                }
             }
         }
 
@@ -618,6 +624,13 @@ namespace LuxOnAir
         private void TabItem_LostFocus(object sender, RoutedEventArgs e)
         {
             CheckMicUsage();
+        }
+
+        private void RadioLocked_Checked(object sender, RoutedEventArgs e)
+        {
+            // Set the UI and saved settings to match whether this option is enabled or not
+            labelLockedColor.IsEnabled = btnLocked.IsEnabled = Settings.Default.Lights.Colors.ChangeOnLock = (bool)radioLockedYes.IsChecked;
+            ApplySettings();
         }
     }
 }
