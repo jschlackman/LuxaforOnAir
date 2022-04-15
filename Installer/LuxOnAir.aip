@@ -17,7 +17,7 @@
     <ROW Property="ProductCode" Value="1033:{44C3E38B-61EE-4B79-A9FD-4DEBD4FF440C} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="Luxafor On Air"/>
-    <ROW Property="ProductVersion" Value="1.0.2"/>
+    <ROW Property="ProductVersion" Value="1.1.0"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{2D455EC4-12E9-4968-A9CB-528C5374A4B9}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
