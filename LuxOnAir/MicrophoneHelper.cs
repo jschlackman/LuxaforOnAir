@@ -1,56 +1,90 @@
 ﻿using Microsoft.Win32;
+using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace LuxOnAir
 {
     internal class MicrophoneHelper
     {
-        // Registry path to mic usage data
+        // Registry path used to watch for mic usage changes (no longer used to determine usage itself)
         public const string MicCapabilityKey = "Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone";
 
+        /// <summary>
+        /// Get the names of all processes with an active audio capture session.
+        /// A session is active while the app has the microphone open, regardless of whether it is muted in the app.
+        /// </summary>
         public static List<string> GetMicUsers()
         {
             List<string> micUsers = new List<string>();
+            int ownPid = Process.GetCurrentProcess().Id;
 
-            // Open the current user mic usage key
-            RegistryKey rootStore = Registry.CurrentUser.OpenSubKey(MicCapabilityKey);
-
-            // Get any current mic users and add their names to the list
-            foreach (string micUser in FindRegKeyWithValueData(rootStore))
+            using (MMDeviceEnumerator enumerator = new MMDeviceEnumerator())
             {
-                micUsers.Add(micUser.Replace("#", "\\"));
+                foreach (MMDevice device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
+                {
+                    using (device)
+                    {
+                        try
+                        {
+                            SessionCollection sessions = device.AudioSessionManager.Sessions;
+
+                            for (int i = 0; i < sessions.Count; i++)
+                            {
+                                AudioSessionControl session = sessions[i];
+
+                                if (session.State != AudioSessionState.AudioSessionStateActive || session.IsSystemSoundsSession)
+                                {
+                                    continue;
+                                }
+
+                                int pid = (int)session.GetProcessID;
+                                if (pid == 0 || pid == ownPid)
+                                {
+                                    continue;
+                                }
+
+                                string name = GetProcessName(pid);
+                                if (!micUsers.Contains(name))
+                                {
+                                    micUsers.Add(name);
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Device may have been removed or become unavailable mid-enumeration; skip it
+                        }
+                    }
+                }
             }
 
             return micUsers;
         }
 
-        private static List<string> FindRegKeyWithValueData(RegistryKey parentKey)
+        private static string GetProcessName(int pid)
         {
-            List<string> micUserNames = new List<string>();
-            
-            // Check if this key has a last used value
-            object lastUsed = parentKey.GetValue("LastUsedTimeStop");
-
-            // If it does...
-            if (lastUsed != null)
+            try
             {
-                // ... check if it is zero, indicating a program currently using the mic
-                ulong value = Convert.ToUInt64(lastUsed);
-                if (value == 0)
+                using (Process process = Process.GetProcessById(pid))
                 {
-                    micUserNames.Add(parentKey.Name.Substring(parentKey.Name.LastIndexOf("\\") + 1));
+                    try
+                    {
+                        return process.MainModule.FileName;
+                    }
+                    catch (Exception)
+                    {
+                        // Access denied for elevated/system processes; fall back to the short name
+                        return process.ProcessName + ".exe";
+                    }
                 }
             }
-
-            // Now recursively check all subkeys
-            foreach (string childKeyName in parentKey.GetSubKeyNames())
+            catch (Exception)
             {
-                RegistryKey childKey = parentKey.OpenSubKey(childKeyName);
-                micUserNames.AddRange(FindRegKeyWithValueData(childKey));
+                return "PID " + pid;
             }
-
-            return micUserNames;
         }
     }
 }
