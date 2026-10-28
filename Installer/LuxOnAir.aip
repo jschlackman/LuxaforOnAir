@@ -41,6 +41,8 @@
     <ROW Component="HidLibrary.dll" ComponentId="{10381667-C3E3-4F6A-A6F2-6095003D396F}" Directory_="APPDIR" Attributes="0" KeyPath="HidLibrary.dll"/>
     <ROW Component="LuxOnAir.exe" ComponentId="{BAA070DE-D901-464B-B060-C34E8D529382}" Directory_="APPDIR" Attributes="0" KeyPath="LuxOnAir.exe"/>
     <ROW Component="LuxaforSharp.dll" ComponentId="{78C007D8-B0F0-42AB-B915-E90CDA03C3E3}" Directory_="APPDIR" Attributes="0" KeyPath="LuxaforSharp.dll"/>
+    <ROW Component="NAudio.Core.dll" ComponentId="{9575554F-F283-41B6-9B94-DEFBFEA4342F}" Directory_="APPDIR" Attributes="0" KeyPath="NAudio.Core.dll"/>
+    <ROW Component="NAudio.Wasapi.dll" ComponentId="{C09BFB37-D817-4671-992D-8E506C808500}" Directory_="APPDIR" Attributes="0" KeyPath="NAudio.Wasapi.dll"/>
     <ROW Component="ProductInformation" ComponentId="{28C19D3F-2FCC-423E-AF75-3874529F89ED}" Directory_="APPDIR" Attributes="260" KeyPath="Version"/>
     <ROW Component="SHORTCUTDIR" ComponentId="{EF85E9BE-9E1F-4E4B-9D94-A0B888DDA490}" Directory_="SHORTCUTDIR" Attributes="0"/>
   </COMPONENT>
@@ -52,6 +54,8 @@
     <ROW File="HidLibrary.dll" Component_="HidLibrary.dll" FileName="HIDLIB~1.DLL|HidLibrary.dll" Attributes="0" SourcePath="..\LuxOnAir\bin\Release\HidLibrary.dll" SelfReg="false"/>
     <ROW File="LuxaforSharp.dll" Component_="LuxaforSharp.dll" FileName="LUXAFO~1.DLL|LuxaforSharp.dll" Attributes="0" SourcePath="..\LuxOnAir\bin\Release\LuxaforSharp.dll" SelfReg="false"/>
     <ROW File="LuxOnAir.exe" Component_="LuxOnAir.exe" FileName="LuxOnAir.exe" Attributes="0" SourcePath="..\LuxOnAir\bin\Release\LuxOnAir.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="NAudio.Core.dll" Component_="NAudio.Core.dll" FileName="NAUDIO~1.DLL|NAudio.Core.dll" Attributes="0" SourcePath="..\LuxOnAir\bin\Release\NAudio.Core.dll" SelfReg="false"/>
+    <ROW File="NAudio.Wasapi.dll" Component_="NAudio.Wasapi.dll" FileName="NAUDIO~2.DLL|NAudio.Wasapi.dll" Attributes="0" SourcePath="..\LuxOnAir\bin\Release\NAudio.Wasapi.dll" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
@@ -136,6 +140,8 @@
     <ROW Feature_="MainFeature" Component_="LuxaforSharp.dll"/>
     <ROW Feature_="MainFeature" Component_="LuxOnAir.exe"/>
     <ROW Feature_="MainFeature" Component_="SHORTCUTDIR"/>
+    <ROW Feature_="MainFeature" Component_="NAudio.Core.dll"/>
+    <ROW Feature_="MainFeature" Component_="NAudio.Wasapi.dll"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="AppIcon.exe" SourcePath="..\LuxOnAir\AppIcon.ico" Index="0"/>
