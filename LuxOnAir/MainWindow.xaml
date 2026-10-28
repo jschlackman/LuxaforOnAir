@@ -38,7 +38,7 @@
                     <Label x:Name="lblAbout" Margin="10,52,172,10" />
                 </Grid>
             </TabItem>
-            <TabItem Header="Debug" LostFocus="TabItem_LostFocus">
+            <TabItem Header="Debug">
                 <Grid Background="#FFE5E5E5">
                     <TextBox x:Name="txtDebugLog" Margin="10,31,10.4,33.8" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" FontFamily="Consolas" FontSize="11" Background="#FF2C2C2C" Foreground="White" />
                     <TextBlock x:Name="textBlock3" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Debug log:" VerticalAlignment="Top"/>

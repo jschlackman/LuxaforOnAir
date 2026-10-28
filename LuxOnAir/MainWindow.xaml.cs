@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using LuxOnAir.Properties;
 using Microsoft.Win32;
-using System.Windows.Forms;
-using LuxOnAir.Properties;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management;
-using System.Windows.Media;
 using System.Threading;
+using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Interop;
+using System.Windows.Media;
 
 namespace LuxOnAir
 {
@@ -35,11 +36,6 @@ namespace LuxOnAir
         /// Watches for system hardware changes (e.g. USB connect/disconnect)
         /// </summary>
         private static ManagementEventWatcher hardwareWatcher;
-
-        /// <summary>
-        /// Watches for registry changes (mic in use)
-        /// </summary>
-        private static ManagementEventWatcher regWatcher;
 
         /// <summary>
         /// Watches for system power events (e.g. suspend/resume)
@@ -105,14 +101,6 @@ namespace LuxOnAir
                 // Get current user SID so we can monitor the correct key in the USERS registry hive
                 string sid = System.Security.Principal.WindowsIdentity.GetCurrent().User.Value;
 
-                // Watch for registry changes
-                regWatcher = new ManagementEventWatcher
-                {
-                    Query = new WqlEventQuery(string.Format("SELECT * FROM RegistryTreeChangeEvent WHERE Hive='HKEY_USERS' AND RootPath='{0}\\\\{1}'", sid, MicrophoneHelper.MicCapabilityKey.Replace("\\", "\\\\")))
-                };
-                regWatcher.EventArrived += RegWatcher_EventArrived;
-                regWatcher.Start();
-
                 // Watch for hardware changes
                 hardwareWatcher = new ManagementEventWatcher
                 {
@@ -128,9 +116,6 @@ namespace LuxOnAir
                 };
                 powerWatcher.EventArrived += PowerEvent_Arrive;
                 powerWatcher.Start();
-
-                // Run the first mic check now
-                CheckMicUsage();
 
                 // Poll audio capture sessions, since Windows no longer reliably updates the registry
                 micPollTimer = new System.Timers.Timer(1000) { AutoReset = true };
@@ -177,15 +162,6 @@ namespace LuxOnAir
         private void ApplySettings()
         {
             Settings.Default.Save();
-            CheckMicUsage();
-        }
-
-        /// <summary>
-        /// Handles registry change events. Check for mic usage whenever a change is detected.
-        /// </summary>
-        private void RegWatcher_EventArrived(object sender, EventArrivedEventArgs e)
-        {
-            CheckMicUsage();
         }
 
         /// <summary>
@@ -194,29 +170,7 @@ namespace LuxOnAir
         /// </summary>
         private void MicPollTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            try
-            {
-                List<string> current = MicrophoneHelper.GetMicUsers();
-                List<string> previous = lastMicUsers ?? new List<string>();
-
-                List<string> started = current.FindAll(u => !previous.Contains(u));
-                List<string> stopped = previous.FindAll(u => !current.Contains(u));
-
-                if (lastMicUsers == null || started.Count > 0 || stopped.Count > 0)
-                {
-                    lastMicUsers = current;
-
-                    // Record which apps started and stopped using the mic
-                    foreach (string app in started) { WriteToDebug("Mic in use by: " + app); }
-                    foreach (string app in stopped) { WriteToDebug("Mic released by: " + app); }
-
-                    CheckMicUsage();
-                }
-            }
-            catch (Exception)
-            {
-                // Ignore transient audio subsystem errors; try again on the next tick
-            }
+            CheckMicUsage();
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -289,8 +243,6 @@ namespace LuxOnAir
 
             // Update the device status UI
             UpdateDeviceStatus();
-            // Run a mic check now
-            CheckMicUsage();
         }
 
         /// <summary>
@@ -341,10 +293,6 @@ namespace LuxOnAir
                     else if (eventValue == "7")
                     {
                         WriteToDebug("System resuming from Suspend, turning lights back on.");
-                        Dispatcher.Invoke(() =>
-                        {
-                            CheckMicUsage();
-                        });
                     }
                 }
             }
@@ -364,7 +312,6 @@ namespace LuxOnAir
                     case SessionSwitchReason.ConsoleConnect:
                         WriteToDebug("Console session unlocked. Setting to standard color.");
                         bConsoleLocked = false;
-                        CheckMicUsage();
                         break;
                     default:
                         WriteToDebug("Console session locked. Setting to Locked color.");
@@ -424,19 +371,18 @@ namespace LuxOnAir
         }
 
         /// <summary>
-        /// Check if the microphone is in use and react accordingly
+        /// Sets lights according to whether the mic is in use and whether the console is locked.
         /// </summary>
-        /// <returns>Text names of all applications using the microphone</returns>
-        private List<string> CheckMicUsage()
+        /// <param name="MicInUse">Whether the mic is currently in use</param>
+        private void SetLights(bool MicInUse = false)
         {
-            List<string> micUsers = MicrophoneHelper.GetMicUsers();
-
+            // Now set lights accordingly
             if (bConsoleLocked)
             {
                 Settings.Default.Lights.SetLocked();
             }
-            // Check if any applications were found using the mic
-            else if (micUsers.Count > 0)
+            // If any applications were found using the mic
+            else if (MicInUse)
             {
                 // Trigger mic in use lights
                 Settings.Default.Lights.SetInUse();
@@ -446,9 +392,49 @@ namespace LuxOnAir
                 // Trigger mic not in use lights
                 Settings.Default.Lights.SetNotInUse();
             }
+        }
+
+        /// <summary>
+        /// Check if the microphone is in use and react accordingly
+        /// </summary>
+        /// <returns>Text names of all applications using the microphone</returns>
+        private List<string> CheckMicUsage()
+        {
+            List<string> micUsers = MicrophoneHelper.GetMicUsers();
+
+            try
+            {
+                
+                List<string> prevMicUsers = lastMicUsers ?? new List<string>();
+
+                // Identify additions and removals fromt he current mic user list
+                List<string> newMicUsers = micUsers.Except(prevMicUsers).ToList();
+                List<string> formerMicUsers = prevMicUsers.Except(micUsers).ToList();
+
+                if (lastMicUsers == null || newMicUsers.Count > 0 || formerMicUsers.Count > 0)
+                {
+                    // Record which apps started and stopped using the mic
+                    foreach (string app in newMicUsers) {
+                            WriteToDebug("Mic in use by: " + app);
+                    }
+                    foreach (string app in formerMicUsers) {
+                            WriteToDebug("Mic released by: " + app);
+                    }
+
+                    // Now set lights accordingly
+                    SetLights(micUsers.Count > 0);
+
+                    // Store mic user list for comparison on next poll
+                    lastMicUsers = micUsers;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ignore transient audio subsystem errors; try again on the next tick
+                WriteToDebug("Failed to check mic usage: " + ex.Message);
+            }
 
             return micUsers;
-
         }
 
         /// <summary>
@@ -526,8 +512,6 @@ namespace LuxOnAir
             micPollTimer.Dispose();
 
             // Stop and dispose of WMI event watchers
-            regWatcher.Stop();
-            regWatcher.Dispose();
             hardwareWatcher.Stop();
             hardwareWatcher.Dispose();
             powerWatcher.Stop();
@@ -668,12 +652,10 @@ namespace LuxOnAir
         private void BtnTestReset_Click(object sender, RoutedEventArgs e)
         {
             WriteToDebug("Resetting to normal status color.");
-            CheckMicUsage();
-        }
 
-        private void TabItem_LostFocus(object sender, RoutedEventArgs e)
-        {
-            CheckMicUsage();
+            List<string> micUsers = MicrophoneHelper.GetMicUsers();
+
+            SetLights(micUsers.Count > 0);
         }
 
         private void RadioLocked_Checked(object sender, RoutedEventArgs e)
