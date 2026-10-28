@@ -95,6 +95,8 @@ namespace LuxOnAir
                 // Update the device status UI
                 UpdateDeviceStatus();
 
+                CheckMicUsage(true);
+
                 // Check if program is correctly set to run at logon
                 chkStartAtLogon.IsChecked = GetRunAtLogon();
 
@@ -164,6 +166,7 @@ namespace LuxOnAir
         private void ApplySettings()
         {
             Settings.Default.Save();
+            CheckMicUsage(true);
         }
 
         /// <summary>
