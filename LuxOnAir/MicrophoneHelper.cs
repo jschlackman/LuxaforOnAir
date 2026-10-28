@@ -24,9 +24,9 @@ namespace LuxOnAir
                 {
                     SessionCollection sessions = device.AudioSessionManager.Sessions;
 
-                    foreach (session in sessions)
+                    for (int i = 0; i < sessions.Count; i++)
                     {
-                        //AudioSessionControl session = sessions[i];
+                        AudioSessionControl session = sessions[i];
 
                         if (session.State == AudioSessionState.AudioSessionStateActive)
                         {
