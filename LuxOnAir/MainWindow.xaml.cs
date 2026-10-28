@@ -117,8 +117,10 @@ namespace LuxOnAir
                 powerWatcher.EventArrived += PowerEvent_Arrive;
                 powerWatcher.Start();
 
-                // Poll audio capture sessions, since Windows no longer reliably updates the registry
-                micPollTimer = new System.Timers.Timer(1000) { AutoReset = true };
+                // Poll audio capture sessions once per second, since Windows 11 no longer updates the registry from build 26300.9550 onwards
+                micPollTimer = new System.Timers.Timer(1000) {
+                    AutoReset = true
+                };
                 micPollTimer.Elapsed += MicPollTimer_Elapsed;
                 micPollTimer.Start();
             }
