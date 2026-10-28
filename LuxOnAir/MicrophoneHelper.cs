@@ -9,9 +9,6 @@ namespace LuxOnAir
 {
     internal class MicrophoneHelper
     {
-        // Registry path used to watch for mic usage changes (no longer used to determine usage itself)
-        public const string MicCapabilityKey = "Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone";
-
         /// <summary>
         /// Get the names of all processes with an active audio capture session.
         /// A session is active while the app has the microphone open, regardless of whether it is muted in the app.
@@ -25,37 +22,25 @@ namespace LuxOnAir
             {
                 foreach (MMDevice device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
                 {
-                    using (device)
+                    SessionCollection sessions = device.AudioSessionManager.Sessions;
+
+                    foreach (session in sessions)
                     {
-                        try
+                        //AudioSessionControl session = sessions[i];
+
+                        if (session.State == AudioSessionState.AudioSessionStateActive)
                         {
-                            SessionCollection sessions = device.AudioSessionManager.Sessions;
+                            // Check session does not belong to current process or is a system sound session
+                            int pid = (int)session.GetProcessID;
 
-                            for (int i = 0; i < sessions.Count; i++)
+                            if (pid != 0 && pid != ownPid && !session.IsSystemSoundsSession)
                             {
-                                AudioSessionControl session = sessions[i];
-
-                                if (session.State != AudioSessionState.AudioSessionStateActive || session.IsSystemSoundsSession)
-                                {
-                                    continue;
-                                }
-
-                                int pid = (int)session.GetProcessID;
-                                if (pid == 0 || pid == ownPid)
-                                {
-                                    continue;
-                                }
-
                                 string name = GetProcessName(pid);
                                 if (!micUsers.Contains(name))
                                 {
                                     micUsers.Add(name);
                                 }
                             }
-                        }
-                        catch (Exception)
-                        {
-                            // Device may have been removed or become unavailable mid-enumeration; skip it
                         }
                     }
                 }
@@ -66,25 +51,46 @@ namespace LuxOnAir
 
         private static string GetProcessName(int pid)
         {
+            string procName = "";
+            bool useFallbacks = false;
             try
             {
                 using (Process process = Process.GetProcessById(pid))
                 {
                     try
                     {
-                        return process.MainModule.FileName;
+                        // Tryt to get the product name from the file version information
+                        procName = process.MainModule.FileVersionInfo.ProductName ?? "";
+
+                        // Use fallbacks if we didn't get a useful name
+                        if (procName == "")
+                        {
+                            useFallbacks = true;
+                        }
                     }
                     catch (Exception)
                     {
-                        // Access denied for elevated/system processes; fall back to the short name
-                        return process.ProcessName + ".exe";
+                        // Access may be denied for elevated/system processes, try fallbacks
+                        useFallbacks = true;
+                    }
+
+                    if (useFallbacks)
+                    {
+                        procName = process.MainWindowTitle ?? "";
+                        if (procName == "")
+                        {
+                            procName = process.ProcessName + ".exe";
+                        }
                     }
                 }
             }
             catch (Exception)
             {
-                return "PID " + pid;
+                // If all else fails, use the process ID
+                procName = "process ID " + pid;
             }
+
+            return procName;
         }
     }
 }
