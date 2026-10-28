@@ -102,6 +102,10 @@ namespace LuxOnAir
                     device.SetColor(LedTarget.All, new LuxaforSharp.Color(color.R, color.G, color.B), 10);
                 }
             }
+            // Stop the blink timer if it was already running
+            if (blinkTimer != null) {
+                blinkTimer.Stop();
+            }
         }
 
         /// <summary>
