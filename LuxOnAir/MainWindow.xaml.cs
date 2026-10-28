@@ -50,7 +50,7 @@ namespace LuxOnAir
         /// <summary>
         /// Mic users seen on the last poll, used to react only when something changes
         /// </summary>
-        private static List<string> lastMicUsers = null;
+        private static List<string> lastMicUsers;
 
         /// <summary>
         /// Keeps track of whether the console is locked or unlocked.
@@ -243,6 +243,9 @@ namespace LuxOnAir
             Settings.Default.Lights.InitHardware();
             WriteToDebug(Settings.Default.Lights.ConnectedDeviceDesc());
 
+            // Trigger a new check of the mic usage since microphones may have changed
+            CheckMicUsage(true);
+
             // Update the device status UI
             UpdateDeviceStatus();
         }
@@ -314,6 +317,7 @@ namespace LuxOnAir
                     case SessionSwitchReason.ConsoleConnect:
                         WriteToDebug("Console session unlocked. Setting to standard color.");
                         bConsoleLocked = false;
+                        CheckMicUsage(true);
                         break;
                     default:
                         WriteToDebug("Console session locked. Setting to Locked color.");
@@ -399,14 +403,14 @@ namespace LuxOnAir
         /// <summary>
         /// Check if the microphone is in use and react accordingly
         /// </summary>
+        /// <param name="ForceUpdate">Force lights to refresh/update even if no changes to mic usage are detected</param>
         /// <returns>Text names of all applications using the microphone</returns>
-        private List<string> CheckMicUsage()
+        private List<string> CheckMicUsage(bool ForceUpdate = false)
         {
             List<string> micUsers = MicrophoneHelper.GetMicUsers();
 
             try
             {
-                
                 List<string> prevMicUsers = lastMicUsers ?? new List<string>();
 
                 // Identify additions and removals fromt he current mic user list
@@ -422,19 +426,25 @@ namespace LuxOnAir
                     foreach (string app in formerMicUsers) {
                             WriteToDebug("Mic released by: " + app);
                     }
+                    // Ensure lights update since a change was detected
+                    ForceUpdate = true;
+                }
 
+                if (ForceUpdate)
+                {
                     // Now set lights accordingly
                     SetLights(micUsers.Count > 0);
-
-                    // Store mic user list for comparison on next poll
-                    lastMicUsers = micUsers;
                 }
+
             }
             catch (Exception ex)
             {
                 // Ignore transient audio subsystem errors; try again on the next tick
                 WriteToDebug("Failed to check mic usage: " + ex.Message);
             }
+
+            // Store mic user list for comparison on next poll
+            lastMicUsers = micUsers;
 
             return micUsers;
         }
@@ -654,10 +664,7 @@ namespace LuxOnAir
         private void BtnTestReset_Click(object sender, RoutedEventArgs e)
         {
             WriteToDebug("Resetting to normal status color.");
-
-            List<string> micUsers = MicrophoneHelper.GetMicUsers();
-
-            SetLights(micUsers.Count > 0);
+            CheckMicUsage(true);
         }
 
         private void RadioLocked_Checked(object sender, RoutedEventArgs e)
