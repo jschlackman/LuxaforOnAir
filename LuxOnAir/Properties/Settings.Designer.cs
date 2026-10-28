@@ -25,9 +25,9 @@ namespace LuxOnAir.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::LuxOnAir.LightSettings Lights {
+        public global::LuxOnAir.LFRSettings Lights {
             get {
-                return ((global::LuxOnAir.LightSettings)(this["Lights"]));
+                return ((global::LuxOnAir.LFRSettings)(this["Lights"]));
             }
             set {
                 this["Lights"] = value;
