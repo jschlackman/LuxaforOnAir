@@ -47,6 +47,16 @@ namespace LuxOnAir
         private static ManagementEventWatcher powerWatcher;
 
         /// <summary>
+        /// Polls the audio capture sessions to detect mic usage changes
+        /// </summary>
+        private static System.Timers.Timer micPollTimer;
+
+        /// <summary>
+        /// Mic users seen on the last poll, used to react only when something changes
+        /// </summary>
+        private static List<string> lastMicUsers = null;
+
+        /// <summary>
         /// Keeps track of whether the console is locked or unlocked.
         /// </summary>
         private static bool bConsoleLocked = false;
@@ -121,6 +131,11 @@ namespace LuxOnAir
 
                 // Run the first mic check now
                 CheckMicUsage();
+
+                // Poll audio capture sessions, since Windows no longer reliably updates the registry
+                micPollTimer = new System.Timers.Timer(1000) { AutoReset = true };
+                micPollTimer.Elapsed += MicPollTimer_Elapsed;
+                micPollTimer.Start();
             }
             else
             {
@@ -171,6 +186,37 @@ namespace LuxOnAir
         private void RegWatcher_EventArrived(object sender, EventArrivedEventArgs e)
         {
             CheckMicUsage();
+        }
+
+        /// <summary>
+        /// Check the audio capture sessions on a timer. Only react when the set of mic users changes,
+        /// so the lights aren't re-triggered (e.g. blink/wave restarted) on every poll.
+        /// </summary>
+        private void MicPollTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                List<string> current = MicrophoneHelper.GetMicUsers();
+                List<string> previous = lastMicUsers ?? new List<string>();
+
+                List<string> started = current.FindAll(u => !previous.Contains(u));
+                List<string> stopped = previous.FindAll(u => !current.Contains(u));
+
+                if (lastMicUsers == null || started.Count > 0 || stopped.Count > 0)
+                {
+                    lastMicUsers = current;
+
+                    // Record which apps started and stopped using the mic
+                    foreach (string app in started) { WriteToDebug("Mic in use by: " + app); }
+                    foreach (string app in stopped) { WriteToDebug("Mic released by: " + app); }
+
+                    CheckMicUsage();
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore transient audio subsystem errors; try again on the next tick
+            }
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -474,6 +520,10 @@ namespace LuxOnAir
             SystemEvents.SessionSwitch -= SessionSwitchHandler;
 
             notifyIcon.Dispose();
+
+            // Stop the mic polling timer
+            micPollTimer.Stop();
+            micPollTimer.Dispose();
 
             // Stop and dispose of WMI event watchers
             regWatcher.Stop();
