@@ -470,7 +470,7 @@ namespace LuxOnAir
         private void BtnDone_Click(object sender, RoutedEventArgs e)
         {
             ApplySettings();
-            Hide();
+            this.WindowState = WindowState.Minimized;
         }
 
         private void ExitMenuItem_Click(object sender, EventArgs e)
