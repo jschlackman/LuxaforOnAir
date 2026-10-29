@@ -461,7 +461,7 @@ namespace LuxOnAir
         {
             Dispatcher.Invoke(() =>
             {
-                txtDebugLog.AppendText(DateTime.Now.ToString("'['yy'-'MM'-'dd HH':'mm':'ss']' ") + Msg);
+                txtDebugLog.AppendText(String.Format("[{0:yy-MM-dd HH:mm:ss}] {1}", DateTime.Now, Msg));
                 if (!NoNewLine) { txtDebugLog.AppendText("\n"); }
                 txtDebugLog.ScrollToEnd();
             });
