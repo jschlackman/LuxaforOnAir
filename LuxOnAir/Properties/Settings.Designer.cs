@@ -33,5 +33,14 @@ namespace LuxOnAir.Properties {
                 this["Lights"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("luxaforapp.exe")]
+        public string ConflictingProcesses {
+            get {
+                return ((string)(this["ConflictingProcesses"]));
+            }
+        }
     }
 }

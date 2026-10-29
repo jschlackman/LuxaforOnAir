@@ -2,8 +2,11 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LuxOnAir.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="Lights" Type="LuxOnAir.LightSettings" Scope="User">
+    <Setting Name="Lights" Type="LuxOnAir.LFRSettings" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ConflictingProcesses" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">luxaforapp.exe</Value>
     </Setting>
   </Settings>
 </SettingsFile>

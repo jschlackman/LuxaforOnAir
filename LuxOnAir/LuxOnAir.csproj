@@ -80,6 +80,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ColorHelper.cs" />
+    <Compile Include="ConflictChecker.cs" />
     <Compile Include="LFRSettings.cs" />
     <Compile Include="LightSettings.cs" />
     <Compile Include="MessageHelper.cs" />
