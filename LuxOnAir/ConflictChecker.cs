@@ -24,7 +24,7 @@ namespace LuxOnAir
         // Constructor
         public ConflictCheck() {
             // Find any potentially conflicting apps
-            conflictingApps = Settings.Default.ConflictingProcesses.Split(';').ToList();
+            conflictingApps = Settings.Default.ConflictingProcesses.ToLower().Split(';').ToList();
             CheckProcesses();
         }
 
