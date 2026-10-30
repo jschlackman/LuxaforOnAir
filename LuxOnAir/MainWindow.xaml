@@ -6,7 +6,11 @@
         mc:Ignorable="d"
         Title="Luxafor On Air Settings" Height="285" Width="495.261" Closing="Window_Closing" Closed="Window_Closed" Icon="AppIcon.ico" StateChanged="Window_StateChanged" MinWidth="600" MinHeight="285" SourceInitialized="Window_SourceInitialized" ResizeMode="CanResizeWithGrip" >
     <Grid Margin="0,0,0,0">
-        <TabControl x:Name="tabControl" Margin="10,10,8,44">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="17*"/>
+            <ColumnDefinition Width="23*"/>
+        </Grid.ColumnDefinitions>
+        <TabControl x:Name="tabControl" Margin="10,10,8,44" Grid.ColumnSpan="2">
             <TabItem Header="General" HorizontalAlignment="Left" Height="20.8" VerticalAlignment="Top" Width="53.6">
                 <Grid Background="#FFE5E5E5">
                     <CheckBox x:Name="chkStartAtLogon" Content="Automatically start program at Windows logon" HorizontalAlignment="Left" Margin="12,0,0,9.8" Checked="ChkStartAtLogon_Changed" Unchecked="ChkStartAtLogon_Changed" Height="15" VerticalAlignment="Bottom" ToolTip="Start this program automatically when the current user logs on (does not affect other users)"/>
@@ -32,7 +36,7 @@
                     <Image x:Name="image_Copy" Margin="0,0,20,0" Source="AppIcon.ico" Stretch="None" HorizontalAlignment="Right" Width="128"/>
                     <Label x:Name="textBlock" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top">
                         <Hyperlink NavigateUri="https://github.com/jschlackman/LuxaforOnAir/" RequestNavigate="Hyperlink_RequestNavigate">
-                            https://github.com/jschlackman/LuxaforOnAir/
+                            <Run Text="https://github.com/jschlackman/LuxaforOnAir/"/>
                         </Hyperlink>
                     </Label>
                     <Label x:Name="lblAbout" Margin="10,52,172,10" />
@@ -51,10 +55,11 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Rectangle Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" Margin="0,0,0,0" Height="38" VerticalAlignment="Bottom"/>
-        <Button x:Name="btnExit" Content="Exit" Margin="0,0,8,10" Height="19" VerticalAlignment="Bottom" Click="ExitMenuItem_Click" HorizontalAlignment="Right" Width="75" ToolTip="Exit the application and turn off lights"/>
-        <Button x:Name="btnDone" Content="Done" Margin="0,0,88,10" Click="BtnDone_Click" Height="19" VerticalAlignment="Bottom" IsDefault="True" HorizontalAlignment="Right" Width="75" ToolTip="Apply settings and close this window without exiting the application"/>
+        <Rectangle Fill="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" Margin="0,0,0,0" Height="38" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+        <Button x:Name="btnExit" Content="Exit" Margin="0,0,8,10" Height="19" VerticalAlignment="Bottom" Click="ExitMenuItem_Click" HorizontalAlignment="Right" Width="75" ToolTip="Exit the application and turn off lights" Grid.Column="1"/>
+        <Button x:Name="btnDone" Content="Done" Margin="0,0,88,10" Click="BtnDone_Click" Height="19" VerticalAlignment="Bottom" IsDefault="True" HorizontalAlignment="Right" Width="75" ToolTip="Apply settings and close this window without exiting the application" Grid.Column="1"/>
         <Ellipse x:Name="elpStatus" Fill="#FFF4F4F5" Margin="10,0,0,12" Stroke="Black" Height="14" Width="14" VerticalAlignment="Bottom" HorizontalAlignment="Left" StrokeThickness="2"/>
         <Label x:Name="lblStatus" Content="Device status" HorizontalAlignment="Left" Margin="26,0,0,6" Height="26" VerticalAlignment="Bottom" IsEnabled="False" Foreground="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+        <Label x:Name="lblConflictWarning" Content="⚠️ Conflicting app may be running. Click here for details." HorizontalAlignment="Right" Margin="0,7,8,0" VerticalAlignment="Top" Width="325" Background="#FFFFD800" HorizontalContentAlignment="Center" Grid.Column="1" MouseEnter="lblConflictWarning_MouseEnter" MouseLeave="lblConflictWarning_MouseLeave" MouseUp="lblConflictWarning_MouseUp"/>
     </Grid>
 </Window>

@@ -52,6 +52,8 @@ namespace LuxOnAir
         /// </summary>
         private static List<string> lastMicUsers;
 
+        private static ConflictCheck conflictingApps;
+
         /// <summary>
         /// Keeps track of whether the console is locked or unlocked.
         /// </summary>
@@ -80,7 +82,7 @@ namespace LuxOnAir
 
                 InitializeComponent();
 
-                lblProductVer.Content = string.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
+                lblProductVer.Content = String.Format("{0} {1}", System.Windows.Forms.Application.ProductName, System.Windows.Forms.Application.ProductVersion);
                 lblAbout.Content = SettingsHelper.About;
 
                 SystemEvents.SessionSwitch += SessionSwitchHandler = new SessionSwitchEventHandler(OnSessionSwitch);
@@ -125,6 +127,8 @@ namespace LuxOnAir
                 };
                 micPollTimer.Elapsed += MicPollTimer_Elapsed;
                 micPollTimer.Start();
+
+                SetConflictMessageVisibility();
             }
             else
             {
@@ -613,6 +617,8 @@ namespace LuxOnAir
             {
                 // When not minimized, make sure it restores to the previous state
                 storedWindowState = WindowState;
+
+                SetConflictMessageVisibility();
             }
         }
 
@@ -675,6 +681,46 @@ namespace LuxOnAir
             // Set the UI and saved settings to match whether this option is enabled or not
             labelLockedColor.IsEnabled = btnLocked.IsEnabled = Settings.Default.Lights.Colors.ChangeOnLock = (bool)radioLockedYes.IsChecked;
             ApplySettings();
+        }
+
+        private void lblConflictWarning_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            lblConflictWarning.Foreground = SystemColors.HotTrackBrush;
+        }
+
+        private void lblConflictWarning_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            lblConflictWarning.Foreground = SystemColors.ControlTextBrush;
+        }
+
+        /// <summary>
+        /// Checks if any potentially conflicting apps are running and shows/hides the warning message acordingly.
+        /// </summary>
+        private void SetConflictMessageVisibility()
+        {
+            // Init checker or run again
+            if (conflictingApps == null) {
+                conflictingApps = new ConflictCheck();
+            } else {
+                conflictingApps.CheckNow();
+            }
+            
+            // Set warning visiblity accordingly
+            if (conflictingApps.Count() == 0)
+            {
+                lblConflictWarning.Visibility = Visibility.Hidden;
+            } else
+            {
+                lblConflictWarning.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void lblConflictWarning_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            System.Windows.Forms.MessageBox.Show(conflictingApps.LongMessage(), "Conflicting app may be running");
+            
+            // Check again, user may have closed the conflict after reviewing details.
+            SetConflictMessageVisibility();
         }
     }
 }

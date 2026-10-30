@@ -36,7 +36,7 @@ namespace LuxOnAir.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("luxaforapp.exe")]
+        [global::System.Configuration.DefaultSettingValueAttribute("LuxaforApp.exe")]
         public string ConflictingProcesses {
             get {
                 return ((string)(this["ConflictingProcesses"]));

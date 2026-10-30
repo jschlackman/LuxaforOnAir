@@ -6,7 +6,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ConflictingProcesses" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">luxaforapp.exe</Value>
+      <Value Profile="(Default)">LuxaforApp.exe</Value>
     </Setting>
   </Settings>
 </SettingsFile>
