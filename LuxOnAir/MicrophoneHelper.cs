@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using System;
 using System.Collections.Generic;

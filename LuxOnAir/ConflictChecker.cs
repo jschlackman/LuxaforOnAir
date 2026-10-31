@@ -22,7 +22,8 @@ namespace LuxOnAir
         private List<string> conflictingApps;
 
         // Constructor
-        public ConflictCheck() {
+        public ConflictCheck()
+        {
             // Find any potentially conflicting apps
             conflictingApps = Settings.Default.ConflictingProcesses.ToLower().Split(';').ToList();
             CheckNow();
@@ -44,7 +45,8 @@ namespace LuxOnAir
             if (runningConflicts.Count != 0)
             {
                 return String.Format("The following apps are running that may conflict with {0}:\n\n{1}\n\nLight behavior may be unpredicatable if these apps are left running.", System.Windows.Forms.Application.ProductName, String.Join("\n", runningConflicts));
-            } else
+            }
+            else
             {
                 return "";
             }
@@ -73,7 +75,7 @@ namespace LuxOnAir
             // Get all running processes on the local computer
             Process[] runningProcs = Process.GetProcesses();
             runningConflicts = new List<string>();
-            
+
             string procName;
 
             foreach (Process proc in runningProcs)

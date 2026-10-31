@@ -1,7 +1,7 @@
-﻿using System;
+﻿using LuxaforSharp;
+using System;
 using System.Linq;
 using System.Timers;
-using LuxaforSharp;
 
 namespace LuxOnAir
 {
@@ -38,7 +38,7 @@ namespace LuxOnAir
         /// <summary>
         /// Number of ms between blinks
         /// </summary>
-        [NonSerialized] 
+        [NonSerialized]
         private const int blinkPeriod = 3000;
 
         /// <summary>
@@ -103,7 +103,8 @@ namespace LuxOnAir
                 }
             }
             // Stop the blink timer if it was already running
-            if (blinkTimer != null) {
+            if (blinkTimer != null)
+            {
                 blinkTimer.Stop();
             }
         }

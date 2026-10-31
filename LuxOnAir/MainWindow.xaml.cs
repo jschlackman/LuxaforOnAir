@@ -12,10 +12,10 @@ using System.Windows.Media;
 
 namespace LuxOnAir
 {
-        /// <summary>
-        /// Interaction logic for MainWindow.xaml
-        /// </summary>
-        public partial class MainWindow : Window
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
     {
         /// <summary>
         /// Indicate if the application should fully exit when closing a window.
@@ -122,7 +122,8 @@ namespace LuxOnAir
                 powerWatcher.Start();
 
                 // Poll audio capture sessions once per second, since Windows 11 no longer updates the registry from build 26300.9550 onwards
-                micPollTimer = new System.Timers.Timer(1000) {
+                micPollTimer = new System.Timers.Timer(1000)
+                {
                     AutoReset = true
                 };
                 micPollTimer.Elapsed += MicPollTimer_Elapsed;
@@ -133,7 +134,7 @@ namespace LuxOnAir
             else
             {
                 // Another instance is already running
-                
+
                 // Message the other instance to show the settings window
                 MessageHelper.PostMessage((IntPtr)MessageHelper.HWND_BROADCAST, MessageHelper.WM_SHOWME, IntPtr.Zero, IntPtr.Zero);
 
@@ -300,7 +301,7 @@ namespace LuxOnAir
                         {
                             Settings.Default.Lights.SetLightsOff();
                         });
-                    } 
+                    }
                     // Resuming from suspend
                     else if (eventValue == "7")
                     {
@@ -366,7 +367,7 @@ namespace LuxOnAir
 
             // Add items to the menu
             TrayIconContextMenu.SuspendLayout();
-            TrayIconContextMenu.Items.AddRange(new ToolStripItem[] {SettingsMenuItem, SpacerMenuItem, ExitMenuItem});
+            TrayIconContextMenu.Items.AddRange(new ToolStripItem[] { SettingsMenuItem, SpacerMenuItem, ExitMenuItem });
             TrayIconContextMenu.ResumeLayout(false);
 
             // Define the notification icon 
@@ -427,11 +428,13 @@ namespace LuxOnAir
                 if (lastMicUsers == null || newMicUsers.Count > 0 || formerMicUsers.Count > 0)
                 {
                     // Record which apps started and stopped using the mic
-                    foreach (string app in newMicUsers) {
-                            WriteToDebug("Mic in use by: " + app);
+                    foreach (string app in newMicUsers)
+                    {
+                        WriteToDebug("Mic in use by: " + app);
                     }
-                    foreach (string app in formerMicUsers) {
-                            WriteToDebug("Mic released by: " + app);
+                    foreach (string app in formerMicUsers)
+                    {
+                        WriteToDebug("Mic released by: " + app);
                     }
                     // Ensure lights update since a change was detected
                     ForceUpdate = true;
@@ -520,7 +523,7 @@ namespace LuxOnAir
         {
             // Literally turn off the lights
             Settings.Default.Lights.ShutdownHardware();
-            
+
             // Stop listening for console lock & unlock events
             SystemEvents.SessionSwitch -= SessionSwitchHandler;
 
@@ -699,17 +702,21 @@ namespace LuxOnAir
         private void SetConflictMessageVisibility()
         {
             // Init checker or run again
-            if (conflictingApps == null) {
+            if (conflictingApps == null)
+            {
                 conflictingApps = new ConflictCheck();
-            } else {
+            }
+            else
+            {
                 conflictingApps.CheckNow();
             }
-            
+
             // Set warning visiblity accordingly
             if (conflictingApps.Count() == 0)
             {
                 lblConflictWarning.Visibility = Visibility.Hidden;
-            } else
+            }
+            else
             {
                 lblConflictWarning.Visibility = Visibility.Visible;
             }
@@ -718,7 +725,7 @@ namespace LuxOnAir
         private void lblConflictWarning_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             System.Windows.Forms.MessageBox.Show(conflictingApps.LongMessage(), "Conflicting app may be running");
-            
+
             // Check again, user may have closed the conflict after reviewing details.
             SetConflictMessageVisibility();
         }
